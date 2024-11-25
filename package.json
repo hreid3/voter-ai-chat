@@ -1,6 +1,7 @@
 {
-  "name": "ai-chatbot",
+  "name": "voter-ai-chat",
   "version": "0.1.0",
+  "author": "Horace Reid III",
   "private": true,
   "scripts": {
     "dev": "next dev --turbo",
