@@ -5,10 +5,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {config} from 'dotenv';
 import {createVoterDataTables} from "@/lib/voter/create-tables";
-import {TableInfo} from "@/lib/voter/types";
+import {ParsedRecord, TableInfo} from "@/lib/voter/types";
+import {vectorIndexTables} from "@/lib/voter/vector-index-tables";
+import {insertParsedCsvRecords} from "@/lib/voter/insert-voter-row-data";
 
 config({
-    path: ['.env.local', __dirname + '../../../.env.local'],
+    path: ['.env.local', path.join(__dirname, '../../.env.local')],
 });
 
 const apiKey = process.env.OPENAI_API_KEY;
@@ -16,23 +18,21 @@ const apiKey = process.env.OPENAI_API_KEY;
 if (!apiKey) {
     throw new Error("Missing OpenAI API key. Set it in the .env file.");
 }
+const connectionString = process.env.PG_VOTERDATA_URL;
 
+if (!process.env.PG_VOTERDATA_URL || !process.env.PG_VOTERDATA_SCHEMA) {
+    throw new Error("Missing VOTERDATA_URL or PG_VOTERDATA_SCHEMA. Set it in the .env file.");
+}
 // Function to process a single CSV file and generate a summary
-async function generateTableSummary(
-    csvPath: string,
+async function generateTableSummary(documents: any[],
     excludeTableNames: string[] = []
 ): Promise<TableInfo> {
-    const excludeListStr = excludeTableNames.join(", ");
-
     // Load the CSV file
-    const csvLoader = new CSVLoader(csvPath);
-    const documents = await csvLoader.load();
     const tableStr = documents
-        .slice(0, 20) // Take the first 20 rows
-        .map(doc => JSON.stringify(doc)) // Convert each row to a JSON string
-        .join("\n"); // Join them with a newline character
+        .slice(0, 20)
+        .map((doc: any) => JSON.stringify(doc))
+        .join("\n");
 
-    // Prepare the prompt
     const prompt = `
 Given a CSV file, provide a summary in the following JSON format ONLY.  Do not provide an explanation.
 - Include a summary of the row data as a field called summary to describe the contents of the row data.
@@ -42,6 +42,8 @@ Given a CSV file, provide a summary in the following JSON format ONLY.  Do not p
 - Utilize the source filename as a contextual hint to help generate unique table names.
 - For each column, include the PostgresSQL type and description relative to the data in the small sample.
 - Do NOT make the table name one of the following:  [${excludeTableNames}].
+- Use Postgres timestamp type for both Date and DateTime values.
+- Only use VARCHAR and TIMESTAMP Postgres COLUMN Types.  NO CHAR TYPES!
 
 Output Format:
 {
@@ -83,14 +85,16 @@ ${tableStr}
     const llm = new ChatOpenAI({
         temperature: 0,
         openAIApiKey: apiKey,
-        model: 'gpt-4o',
+        model: 'gpt-3.5-turbo',
     });
     const parser = new StringOutputParser();
+    console.log("Interacting with LLM...")
     const response = await llm.pipe(parser).stream(messages);
     let json = '';
     for await (const rowData of response) {
         json += rowData;
     }
+    console.log("DONE:  Interacting with LLM...")
     return JSON.parse(json);
 }
 
@@ -105,14 +109,35 @@ async function processCSVFiles(directoryPath: string) {
         console.log(`Processing file: ${filePath}`);
 
         try {
-            const tableInfo = await generateTableSummary(filePath, tableInfos.map(v => v.table_name));
+            const csvLoader = new CSVLoader(filePath);
+            const documents = await csvLoader.load();
+            const tableInfo = await generateTableSummary(documents, tableInfos.map(v => v.table_name));
+            tableInfo.documents = documents as unknown as ParsedRecord
             tableInfos.push(tableInfo);
         } catch (error) {
             console.error(`Error processing ${filePath}: ${(error as Error).message}`);
+            throw error
         }
     }
 
-    return tableInfos;
+    try {
+        const {fullSQL, tableDdls} = await createVoterDataTables(tableInfos)
+        for(const tableDef of tableInfos) {
+            console.log("Inserting rows into ", tableDef.table_name)
+            await insertParsedCsvRecords(tableDef.documents as unknown as ParsedRecord[], tableDef)
+            console.log("Done inserting rows into ", tableDef.table_name)
+        }
+
+        const success = await vectorIndexTables(tableDdls);
+        console.log("Done loading & processing CSV....");
+        process.exit(0);
+    } catch (error) {
+        console.error("Error processing CSV Files", error);
+        throw error;
+    }
+    // Now we need to insert the rows into the databalse.
+    return true;
+    // return tableInfos;
 }
 
 // Example usage
@@ -120,8 +145,7 @@ async function processCSVFiles(directoryPath: string) {
     try {
         const directoryPath = path.join(__dirname, '../../public/uploads');
         const tableInfos = await processCSVFiles(directoryPath);
-        const  { fullSQL, createTableStatements } =await createVoterDataTables(tableInfos)
-        console.log("Table Info Results:", fullSQL, createTableStatements);
+        // console.log("Table Info Results:", fullSQL, tableDdls);
     } catch (error) {
         console.error("Error:", error);
     }

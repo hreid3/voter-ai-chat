@@ -10,7 +10,7 @@ interface ParsedRecord {
     };
 }
 
-export const insertParsedCsvRecord = async (parsedRecord: ParsedRecord, tableInfo: TableInfo): Promise<void> => {
+export const insertParsedCsvRecords = async (parsedRecords: ParsedRecord[], tableInfo: TableInfo): Promise<void> => {
     // Ensure PG_VOTERDATA_URL is defined
     const databaseUrl = process.env.PG_VOTERDATA_URL;
     if (!databaseUrl) {
@@ -24,41 +24,60 @@ export const insertParsedCsvRecord = async (parsedRecord: ParsedRecord, tableInf
         throw new Error("PG_VOTERDATA_SCHEMA environment variable is not set.");
     }
 
-    const { table_name: tableName, columns: columnsInfo } = tableInfo;
+    const { table_name: tableName, columns } = tableInfo;
+    const fullTableName = `${schemaName}.${tableName}`;
+
     try {
-        // Parse the `pageContent` field to extract column names and values
-        const [headerLine, dataLine] = parsedRecord.pageContent.split(':');
-        const headers = headerLine.split('|');
-        let values = dataLine.split('|');
-        if (headers.length  !== values.length) {
-            console.log("Found Record that does not have matching header and values length. Abadoning", parsedRecord)
-            return;
-        }
+        console.log(`Starting batch insertion into table ${fullTableName}`);
 
-        // Format TIMESTAMP values using moment to ensure correct formatting
-        values = values.map((value, index) => {
-            const columnName = headers[index];
-            const columnInfo = columnsInfo[columnName];
-            if (columnInfo?.type.toLowerCase() === 'timestamp') {
-                return moment(value).toISOString(); // Format as ISO-8601 string
+        // Get all parsed records related to this table
+        const rows = parsedRecords.reduce<string[][]>((acc, parsedRecord) => {
+            const [headerLine, dataLine] = parsedRecord.pageContent.split(':');
+            const headers = headerLine.split('|');
+            let originalValues = dataLine.split('|');
+
+            if (headers.length !== originalValues.length) {
+                console.log(`Skipping record due to mismatched headers and values length. Headers: ${headers.length}, Values: ${originalValues.length}`, parsedRecord);
+                return acc; // Skip this record and continue to the next one
             }
-            return value;
-        });
 
-        // Create an object to map column names to values
-        const dataToInsert = headers.reduce<Record<string, string>>((acc, header, index) => {
-            acc[header] = values[index];
+            // Format TIMESTAMP values using moment to ensure correct formatting
+            const formattedValues = originalValues.map((value, index) => {
+                const columnName = headers[index];
+                const columnInfo = columns[columnName];
+                if (columnInfo?.type.toLowerCase() === 'timestamp') {
+                    return moment(value).toISOString(); // Format as ISO-8601 string
+                }
+                return value;
+            });
+
+            acc.push(formattedValues);
             return acc;
-        }, {});
+        }, []);
 
-        // Insert the parsed data into the specified table
-        const fullTableName = `${schemaName}.${tableName}`;
-        const columns = headers.join(', ');
-        const placeholders = values.map((_, index) => `$${index + 1}`).join(', ');
-        const query = `INSERT INTO ${fullTableName} (${columns}) VALUES (${placeholders})`;
-        const result = await client.unsafe(query, values);
+        // Perform batch insert using parameterized queries
+        if (rows.length > 0) {
+            const columnsString = Object.keys(columns).join(', ');
+            for (let i = 0; i < rows.length; i += 100) {
+                const batch = rows.slice(i, i + 100);
+                const valuePlaceholders = batch
+                    .map((row, rowIndex) => `(${row.map((_, colIndex) => `$${rowIndex * row.length + colIndex + 1}`).join(', ')})`)
+                    .join(', ');
+
+                const flattenedValues = batch.flat();
+                const query = `INSERT INTO ${fullTableName} (${columnsString}) VALUES ${valuePlaceholders}`;
+
+                try {
+                    // Perform the batch insert with parameterized query
+                    await client.unsafe(query, flattenedValues);
+                    console.log(`Inserted ${batch.length} row(s) into table ${fullTableName}`);
+                } catch (error) {
+                    console.error(`Error inserting into table ${fullTableName}:`, error);
+                }
+            }
+        }
     } catch (error) {
-        console.error('Error inserting parsed CSV record:', error);
+        console.error('Error during batch insert process:', error);
         throw error;
     } finally {
         // Close the database connection

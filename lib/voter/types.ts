@@ -5,5 +5,20 @@ export type TableInfo = { // TODO:  Use Zod
     columns: Record<string, {
         type: string,
         description: string,
-    }>
+    }>,
+    documents?: ParsedRecord;
 }
+export type VoterTableDdl = {
+    tableInfo: TableInfo,
+    ddl: string,
+}
+
+
+export interface ParsedRecord {
+    pageContent: string;
+    metadata: {
+        source: string;
+        line: number;
+    };
+}
+

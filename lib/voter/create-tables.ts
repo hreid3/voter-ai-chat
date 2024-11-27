@@ -1,5 +1,5 @@
 import postgres from 'postgres';
-import {TableInfo} from "@/lib/voter/types";
+import {TableInfo, VoterTableDdl} from "@/lib/voter/types";
 
 const sanitizeName = (name: string): string => {
     return name?.replace(/\W+/g, '_');
@@ -43,7 +43,7 @@ $$;
 };
 
 // Function to execute the generated SQL script against the database using the postgres module
-const executeSQL = async (sqlScript: string) => {
+const executeSQL = async (sqlScript: string = '') => {
     const connectionString = process.env.PG_VOTERDATA_URL;
 
     if (!connectionString) {
@@ -55,7 +55,7 @@ const executeSQL = async (sqlScript: string) => {
         console.log(`Connecting to Voter Database Schema`);
         sql = postgres(connectionString);
         console.log("Processing script");
-        // await sql.unsafe(sqlScript); // NOT YET
+        await sql.unsafe(sqlScript); // NOT YET
         console.log('SQL script executed successfully');
     } catch (error) {
         console.error('Error executing SQL script:', error);
@@ -68,10 +68,11 @@ const executeSQL = async (sqlScript: string) => {
 // Function to generate CREATE TABLE SQL statements for multiple tables
 export const createVoterDataTables = async (
     tableDefs: TableInfo[],
-): Promise<{ fullSQL: string; createTableStatements: string[]; }> => {
+): Promise<{ fullSQL: string; tableDdls: VoterTableDdl[]; }> => {
+    console.log("Creating DDLs Voter Data Tables");
     let sqlScript = '';
-    const createTableStatements: string[] = [];
-    const schema = process.env.SCHEMA_NAME || 'public';
+    const tableDdls: VoterTableDdl[] = [];
+    const schema = process.env.PG_VOTERDATA_SCHEMA || 'needs-schema';
 
     for (const tableDef of tableDefs) {
         const tableName = `${sanitizeName(schema)}.${sanitizeName(tableDef.table_name)}`;
@@ -95,34 +96,32 @@ export const createVoterDataTables = async (
         });
 
         const columnsString = columnDefinitions.join('\n');
-
+        let tableDdl = ''
         const createTableSQL = `CREATE TABLE ${tableName} (\n${columnsString}\n);\n\n`;
-        sqlScript += createTableSQL;
-
-        createTableStatements.push(createTableSQL);
+        tableDdl += createTableSQL;
 
         const escapedSummary = escapeSingleQuotes(summary);
         const commentTableSQL = `COMMENT ON TABLE ${tableName} IS '${escapedSummary}';\n\n`;
-        sqlScript += commentTableSQL;
+        tableDdl += commentTableSQL
 
         for (const [columnName, columnDef] of Object.entries(columns)) {
             const sanitizedColumnName = sanitizeName(columnName);
             const description = columnDef.description;
             const escapedDescription = escapeSingleQuotes(description);
             const commentColumnSQL = `COMMENT ON COLUMN ${tableName}.${sanitizedColumnName} IS '${escapedDescription}';\n`;
-            sqlScript += commentColumnSQL;
+            tableDdl += commentColumnSQL;
         }
 
-        sqlScript += '\n';
+        sqlScript += tableDdl + '\n';
+        tableDdls.push({tableInfo: tableDef, ddl: tableDdl});
     }
 
     const dropAllObjectsSQL = generateDropAllObjectsSQL(schema);
     sqlScript = dropAllObjectsSQL + '\n' + sqlScript;
     await executeSQL(sqlScript);
-    console.log('CREATE TABLE Statements:');
-    createTableStatements.forEach((stmt) => {
+    console.log('CREATED TABLE Statements:');
+    tableDdls.forEach((stmt) => {
         console.log(stmt);
     });
-
-    return { fullSQL: sqlScript, createTableStatements };
+    return {fullSQL: sqlScript, tableDdls};
 };
