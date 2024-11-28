@@ -4,7 +4,6 @@ import postgres from 'postgres';
 
 type ReturnType = {
   results: string[],
-  voterData: true,
 }
 /**
  * @param selects An array of executable select statements.
@@ -41,7 +40,7 @@ export const executeSelects = async ({ selects = [] }: { selects: string[] }): P
     // No need to explicitly close connection for postgres.js client as it uses a connection pool internally
   }
 
-  return { voterData: true, results };
+  return { results };
 };
 
 // Register the tool for executing SELECT statements

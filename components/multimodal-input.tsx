@@ -30,14 +30,14 @@ import { Textarea } from './ui/textarea';
 
 const suggestedActions = [
   {
-    title: 'What is the weather',
-    label: 'in San Francisco?',
-    action: 'What is the weather in San Francisco?',
+    title: 'How many voters',
+    label: 'are in the state of Georgia?',
+    action: 'How many state Georgians are registered voters?',
   },
   {
-    title: 'Help me draft an essay',
-    label: 'about Silicon Valley',
-    action: 'Help me draft a short essay about Silicon Valley',
+    title: 'How many voters ',
+    label: 'are registered in the city of Atlanta?',
+    action: 'How many voters are registered in the city of Atlanta?',
   },
 ];
 
@@ -310,17 +310,17 @@ export function MultimodalInput({
         </Button>
       )}
 
-      <Button
-        className="rounded-full p-1.5 h-fit absolute bottom-2 right-11 m-0.5 dark:border-zinc-700"
-        onClick={(event) => {
-          event.preventDefault();
-          fileInputRef.current?.click();
-        }}
-        variant="outline"
-        disabled={isLoading}
-      >
-        <PaperclipIcon size={14} />
-      </Button>
+      {/*<Button*/}
+      {/*  className="rounded-full p-1.5 h-fit absolute bottom-2 right-11 m-0.5 dark:border-zinc-700"*/}
+      {/*  onClick={(event) => {*/}
+      {/*    event.preventDefault();*/}
+      {/*    fileInputRef.current?.click();*/}
+      {/*  }}*/}
+      {/*  variant="outline"*/}
+      {/*  disabled={isLoading}*/}
+      {/*>*/}
+      {/*  <PaperclipIcon size={14} />*/}
+      {/*</Button>*/}
     </div>
   );
 }

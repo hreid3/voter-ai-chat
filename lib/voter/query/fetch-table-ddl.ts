@@ -5,7 +5,6 @@ import { z } from 'zod';
 
 type ReturnType = {
     ddls: string[]
-    voterData: true,
 };
 /**
  * Searches the vector store for top_k matches based on the user input.
@@ -59,7 +58,7 @@ export const fetchTableDdls = async ({ userInput, topK = 2 }: { userInput: strin
             FROM ${schemaName}.voter_table_ddl_embeddings AS vte
                      INNER JOIN ${schemaName}.voter_table_ddl AS vtd
                                 ON vte.parent_id = vtd.primary_key
-            WHERE 1 - (vte.chunk_embedding <-> '${arrayEmbeddings}') > 0.35
+            WHERE 1 - (vte.chunk_embedding <-> '${arrayEmbeddings}') > 0.15
             ORDER BY similarity_score DESC
                 LIMIT ${topK};
         `;
@@ -68,7 +67,7 @@ export const fetchTableDdls = async ({ userInput, topK = 2 }: { userInput: strin
 
         // Extract DDLs from the result
         const ddls = result.map(row => row.tableDdl);
-        return { voterData: true, ddls };
+        return { ddls };
     } catch (error) {
         console.error("Error fetching table DDLs:", error);
         throw error;

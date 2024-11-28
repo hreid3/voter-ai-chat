@@ -1,34 +1,12 @@
-import {
-  type Message,
-  StreamData,
-  convertToCoreMessages,
-  streamObject,
-  streamText,
-} from 'ai';
-import { z } from 'zod';
+import {convertToCoreMessages, type Message, StreamData, streamText,} from 'ai';
 
-import { auth } from '@/app/(auth)/auth';
-import { customModel } from '@/lib/ai';
-import { models } from '@/lib/ai/models';
-import { systemPrompt } from '@/lib/ai/prompts';
-import {
-  deleteChatById,
-  getChatById,
-  getDocumentById,
-  saveChat,
-  saveDocument,
-  saveMessages,
-  saveSuggestions,
-} from '@/lib/db/queries';
-import type { Suggestion } from '@/lib/db/schema';
-import {
-  generateUUID,
-  getMostRecentUserMessage,
-  sanitizeResponseMessages,
-} from '@/lib/utils';
+import {auth} from '@/app/(auth)/auth';
+import {models} from '@/lib/ai/models';
+import {deleteChatById, getChatById, saveChat, saveMessages,} from '@/lib/db/queries';
+import {generateUUID, getMostRecentUserMessage, sanitizeResponseMessages,} from '@/lib/utils';
 
-import { generateTitleFromUserMessage } from '../../actions';
-import { getVoterAiChatUiToolset } from "@/lib/voter/query/voter-ui-toolset";
+import {generateTitleFromUserMessage} from '../../actions';
+import {getVoterAiChatUiToolset} from "@/lib/voter/query/voter-ui-toolset";
 import {voterAssistantSystemMessage} from "@/lib/voter/query/prompt-engineering";
 import {openai} from "@ai-sdk/openai";
 
@@ -94,13 +72,18 @@ export async function POST(request: Request) {
 
   const streamingData = new StreamData();
 
-  const result = await streamText({
+  const result =  streamText({
     // model: customModel(model.apiIdentifier),
     model: openai('gpt-3.5-turbo'),
     // system: systemPrompt,
     system: voterAssistantSystemMessage.content,
     messages: coreMessages,
     maxSteps: 5,
+    onStepFinish: ({
+                     response: {messages}
+                   }) => {
+    console.log(messages);
+    },
     // experimental_activeTools: allTools,
     tools: {
       // getWeather: {
@@ -334,7 +317,7 @@ export async function POST(request: Request) {
       //   },
       // },
     },
-    onFinish: async ({ responseMessages }) => {
+    onFinish: async ({ response: { messages: responseMessages} }) => {
       if (session.user?.id) {
         try {
           const responseMessagesWithoutIncompleteToolCalls =
