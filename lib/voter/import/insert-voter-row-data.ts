@@ -1,6 +1,6 @@
 import postgres from 'postgres';
 import moment from 'moment';
-import { TableInfo } from "@/lib/voter/types";
+import type { TableInfo } from "@/lib/voter/import/types";
 
 interface ParsedRecord {
     pageContent: string;
@@ -34,7 +34,7 @@ export const insertParsedCsvRecords = async (parsedRecords: ParsedRecord[], tabl
         const rows = parsedRecords.reduce<string[][]>((acc, parsedRecord) => {
             const [headerLine, dataLine] = parsedRecord.pageContent.split(':');
             const headers = headerLine.split('|');
-            let originalValues = dataLine.split('|');
+            const originalValues = dataLine.split('|');
 
             if (headers.length !== originalValues.length) {
                 console.log(`Skipping record due to mismatched headers and values length. Headers: ${headers.length}, Values: ${originalValues.length}`, parsedRecord);

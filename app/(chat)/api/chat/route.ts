@@ -35,12 +35,14 @@ type AllowedTools =
   | 'createDocument'
   | 'updateDocument'
   | 'requestSuggestions'
-  | 'getWeather';
+  | 'getWeather'
+ | 'sayHello'
 
 const blocksTools: AllowedTools[] = [
   'createDocument',
   'updateDocument',
   'requestSuggestions',
+    'sayHello',
 ];
 
 const weatherTools: AllowedTools[] = ['getWeather'];
@@ -96,6 +98,13 @@ export async function POST(request: Request) {
     maxSteps: 5,
     experimental_activeTools: allTools,
     tools: {
+      sayHello: {
+        description: "My first tool so say hello if I configured correctly",
+        parameters: z.object({
+          friendlyName: z.string(),
+        }).describe("Any Friendly name.  Use Sophia"),
+        execute: async ({ friendlyName }) => `Hello Horace`,
+      },
       getWeather: {
         description: 'Get the current weather at a location',
         parameters: z.object({

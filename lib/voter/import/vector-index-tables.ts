@@ -1,7 +1,7 @@
 import postgres from 'postgres';
 import { OpenAIEmbeddings } from '@langchain/openai';
 import { CharacterTextSplitter } from 'langchain/text_splitter';
-import { VoterTableDdl } from "@/lib/voter/types";
+import type { VoterTableDdl } from "@/lib/voter/import/types";
 
 export const vectorIndexTables = async (tableDds: VoterTableDdl[] = []): Promise<boolean> => {
     // Ensure PG_VOTERDATA_URL is defined
@@ -32,20 +32,22 @@ export const vectorIndexTables = async (tableDds: VoterTableDdl[] = []): Promise
 
         // Step 3: Drop and recreate the `voter_table_ddl` table
         await client.unsafe(`DROP TABLE IF EXISTS ${schemaName}.${voterTableName} CASCADE;`);
-        await client.unsafe(`CREATE TABLE IF NOT EXISTS ${schemaName}.${voterTableName} (
-                                                                                            primary_key SERIAL PRIMARY KEY,
-                                                                                            table_name VARCHAR(255) NOT NULL,
-            table_ddl TEXT NOT NULL,
-            table_embedding VECTOR(1536),
-            updated TIMESTAMPTZ DEFAULT NOW() NOT NULL
+        await client.unsafe(`
+                            CREATE TABLE IF NOT EXISTS ${schemaName}.${voterTableName} (
+                            primary_key SERIAL PRIMARY KEY,
+                            table_name VARCHAR(255) NOT NULL,
+                            table_ddl TEXT NOT NULL,
+                            table_embedding VECTOR(1536),
+                            updated TIMESTAMPTZ DEFAULT NOW() NOT NULL
             );`);
 
         // Step 4: Recreate the `voter_table_ddl_embeddings` table
-        await client.unsafe(`CREATE TABLE IF NOT EXISTS ${schemaName}.${chunkTableName} (
-                                                                                            id SERIAL PRIMARY KEY,
-                                                                                            parent_id INTEGER NOT NULL REFERENCES ${schemaName}.${voterTableName}(primary_key),
-            chunk_embedding VECTOR(1536),
-            chunk_index INTEGER NOT NULL
+        await client.unsafe(`
+                            CREATE TABLE IF NOT EXISTS ${schemaName}.${chunkTableName} (
+                             id SERIAL PRIMARY KEY,
+                             parent_id INTEGER NOT NULL REFERENCES ${schemaName}.${voterTableName}(primary_key),
+                            chunk_embedding VECTOR(1536),
+                            chunk_index INTEGER NOT NULL
             );`);
 
         // Step 5: Create vector indexes for efficient searches
