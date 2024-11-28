@@ -13,8 +13,8 @@ Required Tools will be provided to:
  
 - Do not specify the discovered table or output the select to the user.
  If no results are returned, then let the user know that this is a Voter Registration Chat system and recommend questions about Voter Registration.
-- LIMIT queries to
- 250 rows
+- LIMIT queries to 250 rows
+- Do not add columns to selects/queries that do not exist.  ALL SQL must be valid to avoid runtime errors.
  `
 }
 // export const systemMessage: CoreSystemMessage = {
