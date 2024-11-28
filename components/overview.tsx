@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
-import Link from 'next/link';
 
-import { MessageIcon, VercelIcon } from './icons';
+import { MessageIcon, } from './icons';
 
 export const Overview = () => {
   return (
@@ -18,11 +17,11 @@ export const Overview = () => {
 					<MessageIcon size={32}/>
 				</p>
 				<article className="">
-					<h1 className="text-3xl font-semibold mt-2 mb-2">Welcome to Voter AI Chat!</h1>
-					<p>
+					<h1 className="text-3xl font-semibold my-2">Welcome to Voter AI Chat!</h1>
+					<p>{`
 						I'm here to help you find voter registration information for Georgia quickly and easily. Just ask
 						your questions, and I'll guide you with the data you need. This service is completely free and open to
-						everyone—let's get started!
+						everyone—let's get started!`}
 					</p>
 				</article>
 			</div>

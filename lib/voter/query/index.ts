@@ -6,7 +6,6 @@ import {streamText, tool} from 'ai';
 import {config} from "dotenv";
 import path from "node:path";
 import {readStreamToConsole} from "@/lib/utils";
-import {getVoterAiChatUiToolset} from "@/lib/voter/query/voter-ui-toolset";
 import {voterAssistantSystemMessage} from "@/lib/voter/query/prompt-engineering";
 
 config({
