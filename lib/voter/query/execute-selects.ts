@@ -2,12 +2,16 @@ import { z } from "zod";
 import { tool } from "ai";
 import postgres from 'postgres';
 
+type ReturnType = {
+  results: string[],
+  voterData: true,
+}
 /**
  * @param selects An array of executable select statements.
  * @return Returns a JSON formatted results set
  * @throws Error when a non SQL SELECT Statement is detected.
  */
-export const executeSelects = async ({ selects = [] }: { selects: string[] }): Promise<string[]> => {
+export const executeSelects = async ({ selects = [] }: { selects: string[] }): Promise<ReturnType> => {
   console.log("Called executeSelects", selects);
   const connectionString = process.env.PG_VOTERDATA_URL || 'fail-badly';
   const sql = postgres(connectionString);
@@ -37,7 +41,7 @@ export const executeSelects = async ({ selects = [] }: { selects: string[] }): P
     // No need to explicitly close connection for postgres.js client as it uses a connection pool internally
   }
 
-  return results;
+  return { voterData: true, results };
 };
 
 // Register the tool for executing SELECT statements

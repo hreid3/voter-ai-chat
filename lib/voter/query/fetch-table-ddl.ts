@@ -3,6 +3,10 @@ import { embed, tool } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { z } from 'zod';
 
+type ReturnType = {
+    ddls: string[]
+    voterData: true,
+};
 /**
  * Searches the vector store for top_k matches based on the user input.
  * The following DDL is searched:
@@ -13,7 +17,7 @@ import { z } from 'zod';
  * @param topK Number of top matches to return (default: 2).
  * @return An array of strings where each value represents a DDL of potential matches.
  */
-export const fetchTableDdls = async ({ userInput, topK = 2 }: { userInput: string, topK?: number }): Promise<string[]> => {
+export const fetchTableDdls = async ({ userInput, topK = 2 }: { userInput: string, topK?: number }): Promise<ReturnType> => {
     console.log("Called: fetchTableDdls, received user input", userInput);
 
     // Invariant checks
@@ -64,7 +68,7 @@ export const fetchTableDdls = async ({ userInput, topK = 2 }: { userInput: strin
 
         // Extract DDLs from the result
         const ddls = result.map(row => row.tableDdl);
-        return ddls;
+        return { voterData: true, ddls };
     } catch (error) {
         console.error("Error fetching table DDLs:", error);
         throw error;

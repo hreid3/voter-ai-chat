@@ -47,7 +47,7 @@ const weatherTool = tool({
         ],
         tools: {
             weather: weatherTool,
-            ...getVoterAiChatUiToolset()
+
         }
     });
     await readStreamToConsole(textStream)
