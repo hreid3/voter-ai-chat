@@ -22,21 +22,6 @@ BEGIN
     FOR obj IN (SELECT tablename AS object_name FROM pg_tables WHERE schemaname = '${schema}') LOOP
         EXECUTE 'DROP TABLE IF EXISTS "${schema}"."' || obj.object_name || '" CASCADE;';
     END LOOP;
-
-    -- Drop all views
-    FOR obj IN (SELECT viewname AS object_name FROM pg_views WHERE schemaname = '${schema}') LOOP
-        EXECUTE 'DROP VIEW IF EXISTS "${schema}"."' || obj.object_name || '" CASCADE;';
-    END LOOP;
-
-    -- Drop all sequences
-    FOR obj IN (SELECT sequence_name AS object_name FROM information_schema.sequences WHERE sequence_schema = '${schema}') LOOP
-        EXECUTE 'DROP SEQUENCE IF EXISTS "${schema}"."' || obj.object_name || '" CASCADE;';
-    END LOOP;
-
-    -- Drop all functions
-    FOR obj IN (SELECT routine_name AS object_name FROM information_schema.routines WHERE specific_schema = '${schema}') LOOP
-        EXECUTE 'DROP FUNCTION IF EXISTS "${schema}"."' || obj.object_name || '()" CASCADE;';
-    END LOOP;
 END;
 $$;
 `;
@@ -89,7 +74,7 @@ export const createVoterDataTables = async (
 			const sanitizedColumnName = sanitizeName(columnName);
 			const columnDef = columns[columnName];
 			const dataType = columnDef.type;
-			let columnDefinition = `    ${sanitizedColumnName} ${dataType},`;
+			const columnDefinition = `    ${sanitizedColumnName} ${dataType},`;
 			columnDefinitions.push(columnDefinition);
 		});
 
