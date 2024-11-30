@@ -28,10 +28,7 @@ async function generateTableSummary(documents: any[],
     excludeTableNames: string[] = []
 ): Promise<TableInfo> {
     // Load the CSV file
-    const tableStr = documents
-        .slice(0, 20)
-        .map((doc: any) => JSON.stringify(doc))
-        .join("\n");
+    const tableStr = documents.slice(0, 20)
 
     const prompt = `
 Given a CSV file, provide a summary in the following JSON format ONLY.  Do not provide an explanation.
@@ -69,7 +66,7 @@ Output Format:
 }
 
 TABULAR_DATA:
-${tableStr}
+${JSON.stringify(tableStr)}
 `;
     const messages = [
         {
@@ -103,14 +100,14 @@ ${tableStr}
 async function processCSVFiles(directoryPath: string) {
     const files = fs.readdirSync(directoryPath).filter(file => file.endsWith('.csv'));
 
-    const tableInfos: TableInfo[] = [];
+    const  tableInfos: TableInfo[] = [];
 
     for (const file of files) {
         const filePath = path.join(directoryPath, file);
         console.log(`Processing file: ${filePath}`);
 
         try {
-            const csvLoader = new CSVLoader(filePath);
+            const csvLoader = new CSVLoader(filePath, { separator: '|'});
             const documents = await csvLoader.load();
             const tableInfo = await generateTableSummary(documents, tableInfos.map(v => v.table_name));
             tableInfo.documents = documents as unknown as ParsedRecord

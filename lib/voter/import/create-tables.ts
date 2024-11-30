@@ -51,6 +51,7 @@ const executeSQL = async (sqlScript = '') => {
 		console.log(`Connecting to Voter Database Schema`);
 		sql = postgres(connectionString);
 		console.log("Processing script");
+		await sql.unsafe(`CREATE EXTENSION IF NOT EXISTS vector;`);
 		await sql.unsafe(sqlScript);
 		console.log('SQL script executed successfully');
 	} catch (error) {
