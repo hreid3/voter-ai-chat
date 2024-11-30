@@ -1,13 +1,13 @@
-import {ChatOpenAI} from "@langchain/openai";
-import {CSVLoader} from "@langchain/community/document_loaders/fs/csv";
-import {StringOutputParser} from "@langchain/core/output_parsers";
+import { ChatOpenAI } from "@langchain/openai";
+import { CSVLoader } from "@langchain/community/document_loaders/fs/csv";
+import { StringOutputParser } from "@langchain/core/output_parsers";
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import {config} from 'dotenv';
-import {createVoterDataTables} from "@/lib/voter/import/create-tables";
-import type {ParsedRecord, TableInfo} from "@/lib/voter/import/types";
-import {vectorIndexTables} from "@/lib/voter/import/vector-index-tables";
-import {insertParsedCsvRecords} from "@/lib/voter/import/insert-voter-row-data";
+import { config } from 'dotenv';
+import { createVoterDataTables, dropAllTables } from "@/lib/voter/import/create-tables";
+import type { ParsedRecord, TableInfo } from "@/lib/voter/import/types";
+import { vectorIndexTables } from "@/lib/voter/import/vector-index-tables";
+import { insertParsedCsvRecords } from "@/lib/voter/import/insert-voter-row-data";
 
 config({
     path: ['.env.local', path.join(__dirname, '../../../.env.local')],
@@ -100,41 +100,37 @@ ${JSON.stringify(tableStr)}
 async function processCSVFiles(directoryPath: string) {
     const files = fs.readdirSync(directoryPath).filter(file => file.endsWith('.csv'));
 
-    const  tableInfos: TableInfo[] = [];
+	try {
+    for (const [index, file] of files?.entries()) {
 
-    for (const file of files) {
-        const filePath = path.join(directoryPath, file);
-        console.log(`Processing file: ${filePath}`);
+			if (index === 0) {
+				await dropAllTables()
+			}
 
-        try {
-            const csvLoader = new CSVLoader(filePath, { separator: '|'});
-            const documents = await csvLoader.load();
-            const tableInfo = await generateTableSummary(documents, tableInfos.map(v => v.table_name));
-            tableInfo.documents = documents as unknown as ParsedRecord
-            tableInfos.push(tableInfo);
-        } catch (error) {
-            console.error(`Error processing ${filePath}: ${(error as Error).message}`);
-            throw error
-        }
-    }
+			const filePath = path.join(directoryPath, file);
+			console.log(`Processing file: ${filePath}`);
 
-    try {
-        const {fullSQL, tableDdls} = await createVoterDataTables(tableInfos)
-        for(const tableDef of tableInfos) {
-            console.log("Inserting rows into ", tableDef.table_name)
-            await insertParsedCsvRecords(tableDef.documents as unknown as ParsedRecord[], tableDef)
-            console.log("Done inserting rows into ", tableDef.table_name)
-        }
+			const csvLoader = new CSVLoader(filePath, { separator: '|' });
+			const documents = await csvLoader.load();
+			const tableInfo = await generateTableSummary(documents);
+			tableInfo.documents = documents as unknown as ParsedRecord
 
-        const success = await vectorIndexTables(tableDdls);
-        console.log("Done loading & processing CSV....");
-        process.exit(0);
-    } catch (error) {
-        console.error("Error processing CSV Files", error);
-        throw error;
-    }
+			const { tableDdls } = await createVoterDataTables([tableInfo])
+			console.log("Inserting rows into ", tableInfo.table_name)
+			await insertParsedCsvRecords(tableInfo.documents as unknown as ParsedRecord[], tableInfo)
+			console.log("Done inserting rows into ", tableInfo.table_name)
+
+			const success = await vectorIndexTables(tableDdls);
+			console.log(`Done Processing file: ${filePath}`);
+		}
+		console.log("Done loading & processing CSV....");
+		process.exit(0);
+	} catch (error) {
+			console.error("Error processing CSV Files", error);
+			throw error;
+	}
     // Now we need to insert the rows into the databalse.
-    return true;
+  return true;
     // return tableInfos;
 }
 

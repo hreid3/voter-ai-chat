@@ -38,6 +38,27 @@ $$;
 `;
 };
 
+export const dropAllTables = async () => {
+	let sql;
+	try {
+		const connectionString = process.env.PG_VOTERDATA_URL;
+		if (!connectionString) {
+			console.error('PG_VOTERDATA_URL environment variable is not set.');
+			throw new Error("PG_VOTERDATA_URL environment variable is not set.");
+		}
+		sql = postgres(connectionString);
+		console.log("Dropping all tables from DB.");
+		const schema = process.env.PG_VOTERDATA_SCHEMA || 'needs-schema';
+		await sql.unsafe(generateDropAllObjectsSQL(schema));
+		console.log('SQL script executed successfully');
+	} catch ( error ) {
+		console.error('Error executing SQL script:', error);
+		throw error;
+	} finally {
+		await sql?.end({ timeout: 5 });
+	}
+}
+
 // Function to execute the generated SQL script against the database using the postgres module
 const executeSQL = async (sqlScript = '') => {
 	const connectionString = process.env.PG_VOTERDATA_URL;
@@ -66,7 +87,7 @@ const executeSQL = async (sqlScript = '') => {
 export const createVoterDataTables = async (
 	tableDefs: TableInfo[],
 ): Promise<{ fullSQL: string; tableDdls: VoterTableDdl[]; }> => {
-	console.log("Creating DDLs for Voter Data Tables");
+	console.log("Creating DDLs for Voter Data Table");
 	let sqlScript = '';
 	const tableDdls: VoterTableDdl[] = [];
 	const schema = process.env.PG_VOTERDATA_SCHEMA || 'needs-schema';
@@ -130,8 +151,8 @@ export const createVoterDataTables = async (
 		// No indexes are added at this point for the embedding table for better insert performance
 	}
 
-	const dropAllObjectsSQL = generateDropAllObjectsSQL(schema);
-	sqlScript = `${dropAllObjectsSQL}\n${sqlScript}`;
+	// const dropAllObjectsSQL = generateDropAllObjectsSQL(schema);
+	// sqlScript = `${dropAllObjectsSQL}\n${sqlScript}`;
 	await executeSQL(sqlScript);
 	console.log('CREATED TABLE Statements:');
 	tableDdls.forEach((stmt) => {
