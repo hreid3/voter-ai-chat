@@ -37,18 +37,23 @@ export const insertParsedCsvRecords = async (parsedRecords: ParsedRecord[], tabl
 	try {
 		console.log(`Starting batch insertion into table ${fullTableName}`);
 
-		const rows = parsedRecords.reduce<string[][]>((acc, parsedRecord) => {
+		const columnsString = Object.keys(columns).join(', ');
+
+		let batch = [];
+
+		for (const parsedRecord of parsedRecords) {
 			const lines = parsedRecord.pageContent.split('\n');
 			const rowData: string[] = [];
+
 			lines.forEach(line => {
-				const [key, value]: string[] = line.split(':').map(item => item.trim());
+				const [key, value] = line.split(':').map(item => item.trim());
 				if (key) {
 					const columnInfo = columns[key];
 					let formattedValue = value || '';
 					if (columnInfo?.type.toLowerCase() === 'timestamp' && value) {
 						try {
 							formattedValue = moment(value).toISOString(); // Format as ISO-8601 string
-						} catch ( error ) {
+						} catch (error) {
 							// Keep quiet...
 						}
 					}
@@ -57,77 +62,32 @@ export const insertParsedCsvRecords = async (parsedRecords: ParsedRecord[], tabl
 					console.log(`Skipping line due to missing key. Line: ${line}`);
 				}
 			});
-			acc.push(rowData);
-			return acc;
-		}, []);
 
-		// Perform batch insert using parameterized queries
-		if (rows.length > 0) {
-			const columnsString = Object.keys(columns).join(', ');
-			for (let i = 0; i < rows.length; i += BATCH_SIZE) {
-				const batch = rows.slice(i, i + BATCH_SIZE);
+			batch.push({ rowData, parsedRecord });
 
-				const valuePlaceholders = batch
-					.map((row, rowIndex) => {
-						const placeholders = row.map((_, colIndex) => {
-							return `$${rowIndex * row.length + colIndex + 1}`;
-						});
-						return `(${placeholders.join(', ')})`;
-					})
-					.join(', ');
+			// When batch reaches the defined size, perform the batch insert
+			if (batch.length === BATCH_SIZE) {
+				await insertBatch(batch, columnsString, fullTableName, embeddingTableName, client, columns);
+				totalInsertedRecords += batch.length;
+				totalInsertedEmbeddings += batch.length;
+				batch = []; // Clear the batch after insertion
 
-				const flattenedValues = batch.flat();
-				const query = `INSERT INTO ${fullTableName} (${columnsString}) VALUES ${valuePlaceholders}`;
-
-				try {
-					await client.unsafe(query, flattenedValues);
-					totalInsertedRecords += batch.length;
-					if (totalInsertedRecords % 10000 === 0) {
-						process.stdout.write('. ');
-					}
-				} catch (error) {
-					console.error(`Error inserting into table ${fullTableName}:`, error);
-					throw error; // Halt on error
+				// Print progress after every 10,000 records inserted
+				if (totalInsertedRecords % 10000 === 0) {
+					process.stdout.write('. ');
 				}
+			}
+		}
 
-				const embeddings = new OpenAIEmbeddings({
-					modelName: 'text-embedding-ada-002', // Use ADA explicitly
-				});
+		// Insert any remaining records
+		if (batch.length > 0) {
+			await insertBatch(batch, columnsString, fullTableName, embeddingTableName, client, columns);
+			totalInsertedRecords += batch.length;
+			totalInsertedEmbeddings += batch.length;
 
-				const batchForEmbeddingTable = await Promise.all(batch.map(async (row) => {
-					const valuesToEmbed = Object.keys(columns).reduce((acc, col, index) => {
-						const value = row[index];
-						if (value !== '' && value != null) {
-							acc[col] = value;
-						}
-						return acc;
-					}, {} as Record<string, string>);
-
-					const embeddingText = JSON.stringify(valuesToEmbed);
-
-					return {
-						jsonString: embeddingText,
-					};
-				}));
-
-				const embeddingPlaceholders = batchForEmbeddingTable
-					.map((_, rowIndex) => `($${rowIndex * 1 + 1})`)
-					.join(', ');
-
-				const embeddingValues = batchForEmbeddingTable.flatMap((entry) => [
-					entry.jsonString,
-				]);
-
-				const embeddingQuery = `INSERT INTO ${embeddingTableName} (json_string) VALUES ${embeddingPlaceholders}`;
-
-				try {
-					// Perform the batch insert into the embedding table
-					await client.unsafe(embeddingQuery, embeddingValues);
-					totalInsertedEmbeddings += batchForEmbeddingTable.length;
-				} catch (error) {
-					console.error(`Error inserting into table ${embeddingTableName}:`, error);
-					throw error; // Halt on error
-				}
+			// Print progress if remaining records cross a multiple of 10,000
+			if (totalInsertedRecords % 10000 === 0) {
+				process.stdout.write('. ');
 			}
 		}
 
@@ -142,3 +102,72 @@ export const insertParsedCsvRecords = async (parsedRecords: ParsedRecord[], tabl
 		// No need to call client.end() as Postgres.js manages connection pooling internally
 	}
 };
+
+async function insertBatch(
+	batch: { rowData: string[], parsedRecord: ParsedRecord }[],
+	columnsString: string,
+	fullTableName: string,
+	embeddingTableName: string,
+	client: any,
+	columns: Record<string, { type: string }>
+) {
+	// Prepare data for the main table insertion
+	const rows = batch.map(({ rowData }) => rowData);
+	const valuePlaceholders = rows
+		.map((row, rowIndex) => {
+			const placeholders = row.map((_, colIndex) => {
+				return `$${rowIndex * row.length + colIndex + 1}`;
+			});
+			return `(${placeholders.join(', ')})`;
+		})
+		.join(', ');
+
+	const flattenedValues = rows.flat();
+	const query = `INSERT INTO ${fullTableName} (${columnsString}) VALUES ${valuePlaceholders}`;
+
+	try {
+		await client.unsafe(query, flattenedValues);
+	} catch (error) {
+		console.error(`Error inserting into table ${fullTableName}:`, error);
+		throw error; // Halt on error
+	}
+
+	// Prepare data for the embedding table insertion
+	const embeddings = new OpenAIEmbeddings({
+		modelName: 'text-embedding-ada-002', // Use ADA explicitly
+	});
+
+	const batchForEmbeddingTable = await Promise.all(batch.map(async ({ rowData }) => {
+		const valuesToEmbed = Object.keys(columns).reduce((acc, col, index) => {
+			const value = rowData[index];
+			if (value !== '' && value != null) {
+				acc[col] = value;
+			}
+			return acc;
+		}, {} as Record<string, string>);
+
+		const embeddingText = JSON.stringify(valuesToEmbed);
+
+		return {
+			jsonString: embeddingText,
+		};
+	}));
+
+	const embeddingPlaceholders = batchForEmbeddingTable
+		.map((_, rowIndex) => `($${rowIndex * 1 + 1})`)
+		.join(', ');
+
+	const embeddingValues = batchForEmbeddingTable.flatMap((entry) => [
+		entry.jsonString,
+	]);
+
+	const embeddingQuery = `INSERT INTO ${embeddingTableName} (json_string) VALUES ${embeddingPlaceholders}`;
+
+	try {
+		// Perform the batch insert into the embedding table
+		await client.unsafe(embeddingQuery, embeddingValues);
+	} catch (error) {
+		console.error(`Error inserting into table ${embeddingTableName}:`, error);
+		throw error; // Halt on error
+	}
+}
