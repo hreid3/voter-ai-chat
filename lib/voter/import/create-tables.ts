@@ -17,13 +17,24 @@ DO
 $$
 DECLARE
     obj RECORD;
+    fk RECORD;
 BEGIN
+    -- Drop all foreign key constraints in the schema
+    FOR fk IN 
+        SELECT conname, conrelid::regclass AS tablename
+        FROM pg_constraint
+        WHERE contype = 'f' AND connamespace = '${schema}'::regnamespace
+    LOOP
+        EXECUTE 'ALTER TABLE "' || fk.tablename || '" DROP CONSTRAINT IF EXISTS "' || fk.conname || '";';
+    END LOOP;
+
     -- Drop all tables
     FOR obj IN (SELECT tablename AS object_name FROM pg_tables WHERE schemaname = '${schema}') LOOP
-        EXECUTE 'DROP TABLE IF EXISTS "${schema}"."' || obj.object_name || '" CASCADE;';
+        EXECUTE 'DROP TABLE IF EXISTS "${schema}"."' || obj.object_name || '";';
     END LOOP;
 END;
 $$;
+
 `;
 };
 

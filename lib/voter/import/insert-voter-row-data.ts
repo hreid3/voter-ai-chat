@@ -21,7 +21,7 @@ export const insertParsedCsvRecords = async (parsedRecords: ParsedRecord[], tabl
 	if (!databaseUrl) {
 		throw new Error("PG_VOTERDATA_URL environment variable is not set.");
 	}
-	const splitter = new CharacterTextSplitter({ chunkSize: 1000, chunkOverlap: 0 });
+	const splitter = new CharacterTextSplitter({ chunkSize: 2000, chunkOverlap: 0 });
 
 	// Initialize Postgres.js client
 	const client = postgres(databaseUrl);

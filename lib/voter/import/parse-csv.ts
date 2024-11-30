@@ -36,19 +36,20 @@ async function generateTableSummary(documents: any[],
     const prompt = `
 Given a CSV file, provide a summary in the following JSON format ONLY.  Do not provide an explanation.
 - Include a summary of the row data as a field called summary to describe the contents of the row data.
-- The table name must be unique to the table and describe it while being concise.
+- IMPORTANT: The summary needs to be human meaningful that includes the human readable table name with a minimum of 20 TOKENS and a maximum of 30 tokens!
+- The table name should consist of the filename that has semantic meaning to voter registration. Omit any text that appear to be coded from the table name.  E.g. for file name tbl_prod_GABU202012_new_records.csv, omit the "tbl_prod_GABU202012", and use "new_records" as part of the name to keep it's semantic meaning.
 - The table name should be in lowercase, use underscores to separate words, and must not include any special characters.
-- Do NOT output a generic table name (e.g., table, my_table).
-- Utilize the source filename as a contextual hint to help generate unique table names.
+- Do NOT output a generic table name (e.g., table, my_table, voter_data).
 - For each column, include the PostgresSQL type and description relative to the data in the small sample.
 - Do NOT make the table name one of the following:  [${excludeTableNames}].
 - Use Postgres timestamp type for both Date and DateTime values.
 - Only use VARCHAR and TIMESTAMP Postgres COLUMN Types.  NO CHAR TYPES!
+- Prepend voter_ to the table name for easy identification.
 
 Output Format:
 {
   "file_name": "file name",
-  "table_name": "the table name",
+  "table_name": "voter_the_table_name",
   "summary": "The Summary",
   "columns": {
     "column1": {

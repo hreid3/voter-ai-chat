@@ -10,7 +10,7 @@ type ReturnType = {
 };
 
 // Function to find possible similar values
-export const findPossiblesSimilarValues = async ({ userInput, tableDdl, topK = 3, thres = 0.5 }: { userInput: string, tableDdl: string, topK?: number, thres?: number }): Promise<ReturnType> => {
+export const findPossiblesSimilarValues = async ({ userInput, tableDdl, topK = 3, thres = 0.4 }: { userInput: string, tableDdl: string, topK?: number, thres?: number }): Promise<ReturnType> => {
 	// Step 1: Extract the table name from tableDdl using RegEx
 	const tableNameMatch = tableDdl.match(/CREATE\s+TABLE\s+(\S+)/i);
 	if (!tableNameMatch || !tableNameMatch[1]) {
@@ -47,7 +47,8 @@ export const findPossiblesSimilarValues = async ({ userInput, tableDdl, topK = 3
 		return average;
 	};
 
-	const arrayEmbeddings = `[${computeWeightedAverage(chunkEmbeddings).join(', ')}]`;
+	const averageEmbedding = computeWeightedAverage(chunkEmbeddings);
+	const arrayEmbeddings = `[${averageEmbedding.join(', ')}]`;
 
 	// Step 3: Ensure PG_VOTERDATA_URL is defined
 	const databaseUrl = process.env.PG_VOTERDATA_URL;
@@ -57,20 +58,19 @@ export const findPossiblesSimilarValues = async ({ userInput, tableDdl, topK = 3
 
 	// Initialize Postgres.js client
 	const client = postgres(databaseUrl);
-	const schemaName = process.env.PG_VOTERDATA_SCHEMA;
-	if (!schemaName) {
-		throw new Error('PG_VOTERDATA_SCHEMA environment variable is not set.');
-	}
 
 	try {
-		// Step 4: Execute a similarity search using pgvector
+		// Step 4: Execute a similarity search using pgvector with appropriate filtering
 		const query = `
-      SELECT json_string, 1 - (embedding <-> ${arrayEmbeddings}) AS similarity_score
-      FROM ${schemaName}.${embeddingTableName}
-      WHERE 1 - (embedding <-> ${arrayEmbeddings}) > ${thres}
-      ORDER BY similarity_score DESC
-      LIMIT ${topK};
-    `;
+        SELECT json_string, 1 - (embedding <=> '${arrayEmbeddings}') AS similarity_score
+        FROM ${embeddingTableName}
+        WHERE 1 - (embedding <=> '${arrayEmbeddings}') > ${thres}
+        ORDER BY embedding <=> '${arrayEmbeddings}' ASC
+            LIMIT ${topK};
+		`;
+
+		// Note: The `embedding <=> '${arrayEmbeddings}'` calculates cosine similarity.
+		// We are ordering by this value in ascending order to get the closest matches.
 
 		const result = await client.unsafe(query);
 

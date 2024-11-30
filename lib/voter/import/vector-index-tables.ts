@@ -51,9 +51,9 @@ export const vectorIndexTables = async (tableDds: VoterTableDdl[] = []): Promise
             );`);
 
 		// Step 5: Create vector indexes for efficient searches
-		// Specify the operator class for ivfflat indexing, e.g., using cosine similarity
-		await client.unsafe(`CREATE INDEX IF NOT EXISTS idx_voter_table_embedding ON ${schemaName}.${voterTableName} USING ivfflat (table_embedding vector_cosine_ops);`);
-		await client.unsafe(`CREATE INDEX IF NOT EXISTS idx_voter_table_ddl_embeddings ON ${schemaName}.${chunkTableName} USING ivfflat (chunk_embedding vector_cosine_ops);`);
+		// Use HNSW indexing for more efficient nearest-neighbor searches
+		await client.unsafe(`CREATE INDEX IF NOT EXISTS idx_voter_table_embedding ON ${schemaName}.${voterTableName} USING hnsw (table_embedding vector_cosine_ops) WITH (m = 8, ef_construction = 32);`);
+		await client.unsafe(`CREATE INDEX IF NOT EXISTS idx_voter_table_ddl_embeddings ON ${schemaName}.${chunkTableName} USING hnsw (chunk_embedding vector_cosine_ops) WITH (m = 8, ef_construction = 32);`);
 
 		// Step 6: Initialize LangChain OpenAI Embeddings
 		const embeddings = new OpenAIEmbeddings({
