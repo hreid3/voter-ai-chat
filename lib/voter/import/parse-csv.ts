@@ -6,7 +6,7 @@ import * as path from 'node:path';
 import { config } from 'dotenv';
 import { createVoterDataTables, dropAllTables } from "@/lib/voter/import/create-tables";
 import type { ParsedRecord, TableInfo } from "@/lib/voter/import/types";
-import { vectorIndexTables } from "@/lib/voter/import/vector-index-tables";
+import { vectorIndexTable } from "@/lib/voter/import/vector-index-table";
 import { insertParsedCsvRecords } from "@/lib/voter/import/insert-voter-row-data";
 
 config({
@@ -120,7 +120,7 @@ async function processCSVFiles(directoryPath: string) {
 			await insertParsedCsvRecords(tableInfo.documents as unknown as ParsedRecord[], tableInfo)
 			console.log("Done inserting rows into ", tableInfo.table_name)
 
-			const success = await vectorIndexTables(tableDdls);
+			const success = tableDdls?.[0] && await vectorIndexTable(tableDdls?.[0]);
 			console.log(`Done Processing file: ${filePath}`);
 		}
 		console.log("Done loading & processing CSV....");

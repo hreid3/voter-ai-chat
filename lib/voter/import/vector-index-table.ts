@@ -3,7 +3,7 @@ import { OpenAIEmbeddings } from '@langchain/openai';
 import { CharacterTextSplitter } from 'langchain/text_splitter';
 import type { VoterTableDdl } from "@/lib/voter/import/types";
 
-export const vectorIndexTables = async (tableDds: VoterTableDdl[] = []): Promise<boolean> => {
+export const vectorIndexTable = async (tableDdlItem: VoterTableDdl): Promise<boolean> => {
 	// Ensure PG_VOTERDATA_URL is defined
 	const databaseUrl = process.env.PG_VOTERDATA_URL;
 	if (!databaseUrl) {
@@ -27,11 +27,6 @@ export const vectorIndexTables = async (tableDds: VoterTableDdl[] = []): Promise
 		// Step 1: Create the pgvector extension if not exists
 		await client.unsafe(`CREATE EXTENSION IF NOT EXISTS vector;`);
 
-		// Step 2: Drop and recreate the `voter_table_ddl_embeddings` table first
-		await client.unsafe(`DROP TABLE IF EXISTS ${schemaName}.${chunkTableName} CASCADE;`);
-
-		// Step 3: Drop and recreate the `voter_table_ddl` table
-		await client.unsafe(`DROP TABLE IF EXISTS ${schemaName}.${voterTableName} CASCADE;`);
 		await client.unsafe(`
         CREATE TABLE IF NOT EXISTS ${schemaName}.${voterTableName} (
                                                                        primary_key SERIAL PRIMARY KEY,
@@ -61,7 +56,6 @@ export const vectorIndexTables = async (tableDds: VoterTableDdl[] = []): Promise
 		});
 
 		// Step 7: Process each table DDL in the list
-		for (const tableDdlItem of tableDds) {
 			const { tableInfo, ddl } = tableDdlItem;
 			const { table_name } = tableInfo;
 
@@ -90,17 +84,14 @@ export const vectorIndexTables = async (tableDds: VoterTableDdl[] = []): Promise
 			await client.unsafe(
 				`INSERT INTO ${schemaName}.${chunkTableName} (parent_id, chunk_index, chunk_embedding) VALUES ${chunkValues}`
 			);
-		}
-
-		// Close the database connection
-		await client.end();
 
 		// Return success
 		return true;
 	} catch (error) {
 		console.error('Error in vectorIndexTables:', error);
 		// Close the database connection in case of error
-		await client.end();
 		throw error;
+	} finally {
+		await client.end();
 	}
 };
