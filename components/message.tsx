@@ -14,6 +14,7 @@ import { Markdown } from './markdown';
 import { MessageActions } from './message-actions';
 import { PreviewAttachment } from './preview-attachment';
 import { Weather } from './weather';
+import ErrorBubble from "@/components/ui/error-bubble";
 
 export const PreviewMessage = ({
   chatId,
@@ -59,7 +60,6 @@ export const PreviewMessage = ({
             <div className="flex flex-col gap-4">
               {message.toolInvocations.map((toolInvocation) => {
                 const { toolName, toolCallId, state, args } = toolInvocation;
-
                 if (state === 'result') {
                   const { result } = toolInvocation;
 
@@ -88,7 +88,9 @@ export const PreviewMessage = ({
                           block={block}
                           setBlock={setBlock}
                         />
-                      ) : (
+                      ) : toolName === 'errorMessageTool' ? (
+												<ErrorBubble message={args?.errorMessage || "Error Message"} />
+											) : (
                         <pre>{JSON.stringify(result, null, 2)}</pre>
                       )}
                     </div>
@@ -121,7 +123,7 @@ export const PreviewMessage = ({
                         args={args}
                         setBlock={setBlock}
                       />
-                    ) : null}
+                    ) : null }
                   </div>
                 );
               })}

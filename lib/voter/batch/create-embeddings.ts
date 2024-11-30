@@ -1,4 +1,4 @@
-import postgres, { Sql } from 'postgres';
+import postgres, { type Sql } from 'postgres';
 import { OpenAIEmbeddings } from '@langchain/openai';
 import { CharacterTextSplitter } from 'langchain/text_splitter';
 import { config } from 'dotenv';

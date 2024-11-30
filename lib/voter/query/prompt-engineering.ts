@@ -1,4 +1,4 @@
-import type {CoreSystemMessage} from "ai";
+import type { CoreSystemMessage } from "ai";
 
 export const voterAssistantSystemMessage: CoreSystemMessage = {
     role: "system",
@@ -23,6 +23,10 @@ Rules:
 - ALL SQL must be valid to avoid runtime errors.
 - Every SELECT statement tnat needs to be executed must contain a WHERE clause.
 - LIMIT queries to 250 rows
+
+Error Rules:
+- If any tool return an { error: message } response, invoke the Error message.
+- Do not respond with any message when an error is surfaced from a tool.
 `
 }
 // export const systemMessage: CoreSystemMessage = {

@@ -1,16 +1,17 @@
-import {convertToCoreMessages, type Message, StreamData, streamText,} from 'ai';
+import { convertToCoreMessages, type Message, StreamData, streamText, } from 'ai';
 
-import {auth} from '@/app/(auth)/auth';
-import {models} from '@/lib/ai/models';
-import {deleteChatById, getChatById, saveChat, saveMessages,} from '@/lib/db/queries';
-import {generateUUID, getMostRecentUserMessage, sanitizeResponseMessages,} from '@/lib/utils';
+import { auth } from '@/app/(auth)/auth';
+import { models } from '@/lib/ai/models';
+import { deleteChatById, getChatById, saveChat, saveMessages, } from '@/lib/db/queries';
+import { generateUUID, getMostRecentUserMessage, sanitizeResponseMessages, } from '@/lib/utils';
 
-import {generateTitleFromUserMessage} from '../../actions';
-import {getVoterAiChatUiToolset} from "@/lib/voter/query/voter-ui-toolset";
-import {voterAssistantSystemMessage} from "@/lib/voter/query/prompt-engineering";
-import {openai} from "@ai-sdk/openai";
+import { generateTitleFromUserMessage } from '../../actions';
+import { getVoterAiChatUiToolset } from "@/lib/voter/query/voter-ui-toolset";
+import { voterAssistantSystemMessage } from "@/lib/voter/query/prompt-engineering";
+import { openai } from "@ai-sdk/openai";
+import { z } from 'zod';
 
-export const maxDuration = 60;
+// const maxDuration = 60;
 
 type AllowedTools =
   | 'createDocument'
@@ -74,7 +75,8 @@ export async function POST(request: Request) {
 
   const result =  streamText({
     // model: customModel(model.apiIdentifier),
-    model: openai('gpt-3.5-turbo'),
+		// model: openai('gpt-3.5-turbo'),
+		model: openai('gpt-4o-2024-08-06'),
     // system: systemPrompt,
     system: voterAssistantSystemMessage.content,
     messages: coreMessages,
@@ -86,6 +88,13 @@ export async function POST(request: Request) {
     },
     // experimental_activeTools: allTools,
     tools: {
+			errorMessageTool: {
+				description: "A utility tool to process and handle error messages returned by any other tool. It helps capture, log, and communicate error messages effectively in a structured manner.",
+				parameters: z.object({
+					errorMessage: z.string().describe("The detailed error message that was generated during the execution of another tool. This error message is expected to provide a clear description of what went wrong, including any relevant context or diagnostic information."),
+				}).describe("An object containing the necessary parameters for handling the error message, specifically the error message string that needs to be logged or processed."),
+				execute: async ({ errorMessage }) => (errorMessage),
+			},
       // getWeather: {
       //   description: 'Get the current weather at a location',
       //   parameters: z.object({

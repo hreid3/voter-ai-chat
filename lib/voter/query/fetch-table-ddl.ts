@@ -4,11 +4,17 @@ import { openai } from '@ai-sdk/openai';
 import { z } from 'zod';
 import { findPossiblesSimilarValues } from "@/lib/voter/query/find-possibles-similar-values";
 
+type DdlResult = {
+	ddl: string,
+	possibleValuesForColumns: string[]
+};
+
 type ReturnType = {
-	ddls: Array<{
-		ddl: string,
-		possibleValuesForColumns: string[]
-	}>
+	ddls: DdlResult[]
+};
+
+type ErrorMessage = {
+	error: string
 };
 
 /**
@@ -25,28 +31,31 @@ type ReturnType = {
  * @param topK Number of top matches to return (default: 2).
  * @return An array of strings where each value represents a DDL of potential matches.
  */
-export const fetchTableDdls = async ({ userInput, topK = 2 }: { userInput: string, topK?: number }): Promise<ReturnType> => {
+export const fetchTableDdls = async ({ userInput, topK = 2 }: {
+	userInput: string,
+	topK?: number
+}): Promise<ReturnType | ErrorMessage> => {
 	console.log("Called: fetchTableDdls, received user input", userInput);
 
-	// Invariant checks
-	if (!userInput) {
-		throw new Error("Invariant violation: userInput must not be empty.");
-	}
-	if (topK <= 0) {
-		throw new Error("Invariant violation: topK must be greater than 0.");
-	}
-
-	const connectionString = process.env.PG_VOTERDATA_URL;
-	if (!connectionString) {
-		throw new Error("Invariant violation: PG_VOTERDATA_URL must be set.");
-	}
-
-	const schemaName = process.env.PG_VOTERDATA_SCHEMA || 'fail_badly';
-
-	// Initialize the postgres client after the invariant checks
-	const sql = postgres(connectionString, { transform: postgres.camel, prepare: false });
-
 	try {
+		// Invariant checks
+		if (!userInput) {
+			throw new Error("Invariant violation: userInput must not be empty.");
+		}
+		if (topK <= 0) {
+			throw new Error("Invariant violation: topK must be greater than 0.");
+		}
+
+		const connectionString = process.env.PG_VOTERDATA_URL;
+		if (!connectionString) {
+			throw new Error("Invariant violation: PG_VOTERDATA_URL must be set.");
+		}
+
+		const schemaName = process.env.PG_VOTERDATA_SCHEMA || 'fail_badly';
+
+		// Initialize the postgres client after the invariant checks
+		const sql = postgres(connectionString, { transform: postgres.camel, prepare: false });
+
 		// Step 1: Generate an embedding for the userInput using OpenAI's Ada model
 		const { embedding: userInputEmbedding } = await embed({
 			model: openai.embedding('text-embedding-ada-002'),
@@ -62,39 +71,48 @@ export const fetchTableDdls = async ({ userInput, topK = 2 }: { userInput: strin
 		const arrayEmbeddings = `[${userInputEmbedding.join(',')}]`;
 
 		// Step 2: Use a subquery for similarity-based search on chunk embeddings with a threshold filter
-		const similarityThreshold = 0.75; // Define a threshold between 0.0 and 1.0 for filtering
+		const similarityThreshold = 0.70; // Define a threshold between 0.0 and 1.0 for filtering
 
 		const query = `
-            SELECT vtd.table_ddl
-            FROM ${schemaName}.voter_table_ddl AS vtd
-            WHERE vtd.primary_key IN (
-                SELECT vtde.parent_id 
-                FROM ${schemaName}.voter_table_ddl_embeddings AS vtde
-                WHERE 1 - (vtde.chunk_embedding <=> $1) > ${similarityThreshold}
-                ORDER BY vtde.chunk_embedding <=> $1
-                LIMIT ${topK}
+        SELECT vtd.table_ddl
+        FROM ${schemaName}.voter_table_ddl AS vtd
+        WHERE vtd.primary_key IN (
+            SELECT vtde.parent_id
+            FROM ${schemaName}.voter_table_ddl_embeddings AS vtde
+            WHERE 1 - (vtde.chunk_embedding <=> $1) > ${similarityThreshold}
+            ORDER BY vtde.chunk_embedding <=> $1
+            LIMIT ${topK}
             );
-        `;
+		`;
 
 		// Execute the query with parameterized embedding input
 		const result = await sql.unsafe(query, [arrayEmbeddings]);
 
-		// Extract DDLs from the result
-		const ddls = await Promise.all(result.map(async (row) => {
-			const { possibleValues } = await findPossiblesSimilarValues({
+		// Extract DDLs from the result and find possible similar values for each DDL
+		const ddls = [];
+		for (const row of result) {
+			const possibleValuesResult = await findPossiblesSimilarValues({
 				userInput,
 				tableDdl: row.tableDdl,
 			});
-			return {
+
+			// If an error occurs, abort and return an error message
+			if ('error' in possibleValuesResult) {
+				return { error: "Something went wrong while finding possible values for the columns." };
+			}
+
+			ddls.push({
 				ddl: row.tableDdl,
-				possibleValuesForColumns: possibleValues
-			};
-		}));
+				possibleValuesForColumns: possibleValuesResult.possibleValues
+			});
+		}
 
 		return { ddls };
 	} catch (error) {
 		console.error("Error fetching table DDLs:", error);
-		throw error;
+		return {
+			error: "Something went wrong, so I could not process your request."
+		};
 	}
 };
 
