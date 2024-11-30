@@ -54,7 +54,7 @@ const createEmbeddings = async (): Promise<void> => {
 
 		// Step 2: Increase `maintenance_work_mem` to ensure sufficient memory for index creation
 		try {
-			await client.unsafe(`SET maintenance_work_mem TO '512MB';`);
+			await client.unsafe(`SET maintenance_work_mem TO '1GB';`);
 			console.log('Increased maintenance_work_mem to 512MB');
 		} catch (error) {
 			console.error('Error setting maintenance_work_mem:', error);
