@@ -151,8 +151,6 @@ export const createVoterDataTables = async (
 		// No indexes are added at this point for the embedding table for better insert performance
 	}
 
-	// const dropAllObjectsSQL = generateDropAllObjectsSQL(schema);
-	// sqlScript = `${dropAllObjectsSQL}\n${sqlScript}`;
 	await executeSQL(sqlScript);
 	console.log('CREATED TABLE Statements:');
 	tableDdls.forEach((stmt) => {
