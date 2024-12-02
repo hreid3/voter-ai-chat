@@ -17,8 +17,8 @@
     "db:pull": "drizzle-kit pull",
     "db:check": "drizzle-kit check",
     "db:up": "drizzle-kit up",
-    "voterdata:import": "node --max_old_space_size=8192 ./node_modules/.bin/tsx lib/voter/import/parse-csv.ts",
-    "voterdata:create-embeddings": "tsx lib/voter/batch/create-embeddings.ts"
+    "voterdata:import": "cross-env NODE_OPTIONS=\"--max-old-space-size=12288\" tsx lib/voter/import/parse-csv.ts",
+    "voterdata:create-embeddings": "cross-env NODE_OPTIONS=\"--max-old-space-size=12288\" tsx lib/voter/batch/create-embeddings.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "1.0.5",
@@ -89,6 +89,7 @@
     "@types/pdf-parse": "^1.1.4",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "cross-env": "^7.0.3",
     "drizzle-kit": "^0.25.0",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.5",

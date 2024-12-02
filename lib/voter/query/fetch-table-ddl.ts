@@ -91,19 +91,20 @@ export const fetchTableDdls = async ({ userInput, topK = 2 }: {
 		// Extract DDLs from the result and find possible similar values for each DDL
 		const ddls = [];
 		for (const row of result) {
-			const possibleValuesResult = await findPossiblesSimilarValues({
-				userInput,
-				tableDdl: row.tableDdl,
-			});
+			// const possibleValuesResult = await findPossiblesSimilarValues({
+			// 	userInput,
+			// 	tableDdl: row.tableDdl,
+			// });
 
 			// If an error occurs, abort and return an error message
-			if ('error' in possibleValuesResult) {
-				return { error: "Something went wrong while finding possible values for the columns." };
-			}
+			// if ('error' in possibleValuesResult) {
+			// 	return { error: "Something went wrong while finding possible values for the columns." };
+			// }
 
 			ddls.push({
 				ddl: row.tableDdl,
-				possibleValuesForColumns: possibleValuesResult.possibleValues
+				possibleValuesForColumns: [],
+				// possibleValuesForColumns: possibleValuesResult.possibleValues
 			});
 		}
 
