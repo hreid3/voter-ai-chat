@@ -1,12 +1,12 @@
 'use server'
-import {openai} from "@ai-sdk/openai"
+import { openai } from "@ai-sdk/openai"
 import 'dotenv/config';
-import {z} from 'zod';
-import {streamText, tool} from 'ai';
-import {config} from "dotenv";
+import { z } from 'zod';
+import { streamText, tool } from 'ai';
+import { config } from "dotenv";
 import path from "node:path";
-import {readStreamToConsole} from "@/lib/utils";
-import {voterAssistantSystemMessage} from "@/lib/voter/query/prompt-engineering";
+import { readStreamToConsole } from "@/lib/utils";
+import { voterAssistantSystemMessage } from "@/lib/voter/query/prompt-engineering";
 
 config({
     path: ['.env.local', path.join(__dirname, '../../../.env.local')],

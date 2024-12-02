@@ -16,7 +16,9 @@
     "db:push": "drizzle-kit push",
     "db:pull": "drizzle-kit pull",
     "db:check": "drizzle-kit check",
-    "db:up": "drizzle-kit up"
+    "db:up": "drizzle-kit up",
+    "voterdata:import": "cross-env NODE_OPTIONS=\"--max-old-space-size=12288\" tsx lib/voter/import/parse-csv.ts",
+    "voterdata:create-embeddings": "cross-env NODE_OPTIONS=\"--max-old-space-size=12288\" tsx lib/voter/batch/create-embeddings.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "1.0.5",
@@ -41,6 +43,7 @@
     "class-variance-authority": "^0.7.0",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",
+    "csv-reader": "^1.0.12",
     "d3-dsv": "^3.0.1",
     "date-fns": "^4.1.0",
     "diff-match-patch": "^1.0.5",
@@ -86,6 +89,7 @@
     "@types/pdf-parse": "^1.1.4",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "cross-env": "^7.0.3",
     "drizzle-kit": "^0.25.0",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.5",
