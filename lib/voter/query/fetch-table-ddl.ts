@@ -2,7 +2,6 @@ import postgres from 'postgres';
 import { embed, tool } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { z } from 'zod';
-import { findPossiblesSimilarValues } from "@/lib/voter/query/find-possibles-similar-values";
 
 type DdlResult = {
 	ddl: string,

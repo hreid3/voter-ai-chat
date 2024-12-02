@@ -9,7 +9,6 @@ import { generateTitleFromUserMessage } from '../../actions';
 import { getVoterAiChatUiToolset } from "@/lib/voter/query/voter-ui-toolset";
 import { voterAssistantSystemMessage } from "@/lib/voter/query/prompt-engineering";
 import { openai } from "@ai-sdk/openai";
-import { z } from 'zod';
 
 // const maxDuration = 60;
 

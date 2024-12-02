@@ -95,7 +95,8 @@ ${JSON.stringify(tableStr)}
 }
 
 // Function to insert parsed CSV records into the database
-async function processBatch(batch: ParsedRecord[], tableInfo: TableInfo, totalInsertedRecords: number): Promise<number> {
+async function processBatch(batch: ParsedRecord[], tableInfo: TableInfo, totalInsertedRecordsParam: number): Promise<number> {
+	let totalInsertedRecords = totalInsertedRecordsParam
 	await insertParsedCsvRecords(batch, tableInfo);
 	totalInsertedRecords += batch.length;
 	if (totalInsertedRecords % 10000 === 0) {
