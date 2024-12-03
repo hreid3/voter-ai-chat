@@ -1,6 +1,4 @@
-import postgres from 'postgres';
-import { embed, tool } from 'ai';
-import { openai } from '@ai-sdk/openai';
+import { tool } from 'ai';
 import { z } from 'zod';
 
 type DdlResult = {
@@ -30,7 +28,7 @@ type ErrorMessage = {
  * @param topK Number of top matches to return (default: 2).
  * @return An array of strings where each value represents a DDL of potential matches.
  */
-export const fetchTableDdls = async ({ userInput, topK = 2 }: {
+export const fetchTableDdls = async ({userInput, topK = 2}: {
 	userInput: string,
 	topK?: number
 }): Promise<ReturnType | ErrorMessage> => {
@@ -45,69 +43,111 @@ export const fetchTableDdls = async ({ userInput, topK = 2 }: {
 			throw new Error("Invariant violation: topK must be greater than 0.");
 		}
 
-		const connectionString = process.env.PG_VOTERDATA_URL;
-		if (!connectionString) {
-			throw new Error("Invariant violation: PG_VOTERDATA_URL must be set.");
-		}
-
-		const schemaName = process.env.PG_VOTERDATA_SCHEMA || 'fail_badly';
-
-		// Initialize the postgres client after the invariant checks
-		const sql = postgres(connectionString, { transform: postgres.camel, prepare: false });
-
-		// Step 1: Generate an embedding for the userInput using OpenAI's Ada model
-		const { embedding: userInputEmbedding } = await embed({
-			model: openai.embedding('text-embedding-ada-002'),
-			value: userInput,
-		});
-
-		// Ensure the embedding is an array of numbers
-		if (!Array.isArray(userInputEmbedding) || userInputEmbedding.some(Number.isNaN)) {
-			throw new Error("Invariant violation: Embedding must be an array of numbers.");
-		}
-
-		// Convert embedding array to string representation for SQL
-		const arrayEmbeddings = `[${userInputEmbedding.join(',')}]`;
-
-		// Step 2: Use a subquery for similarity-based search on chunk embeddings with a threshold filter
-		const similarityThreshold = 0.70; // Define a threshold between 0.0 and 1.0 for filtering
-
-		const query = `
-        SELECT vtd.table_ddl
-        FROM ${schemaName}.voter_table_ddl AS vtd
-        WHERE vtd.primary_key IN (
-            SELECT vtde.parent_id
-            FROM ${schemaName}.voter_table_ddl_embeddings AS vtde
-            WHERE 1 - (vtde.chunk_embedding <=> $1) > ${similarityThreshold}
-            ORDER BY vtde.chunk_embedding <=> $1
-            LIMIT ${topK}
-            );
-		`;
-
-		// Execute the query with parameterized embedding input
-		const result = await sql.unsafe(query, [arrayEmbeddings]);
-
-		// Extract DDLs from the result and find possible similar values for each DDL
 		const ddls = [];
-		for (const row of result) {
-			// const possibleValuesResult = await findPossiblesSimilarValues({
-			// 	userInput,
-			// 	tableDdl: row.tableDdl,
-			// });
+		ddls.push({
+			possibleValuesForColumns: [],
+			// Now that I am refactoring for final system state, removed the Similarity Search as there is really one single table.
+			// The other tables only denormalized deltas
+			/* The following was gnerated by Chat GPT 3.5 Turbo when inserting rows. */
+			ddl: `
+"CREATE TABLE public.voter_all_data (
+    county_code VARCHAR,
+    registration_number VARCHAR,
+    voter_status VARCHAR,
+    residence_city VARCHAR,
+    residence_zipcode VARCHAR,
+    birthyear VARCHAR,
+    registration_date TIMESTAMP,
+    race VARCHAR,
+    gender VARCHAR,
+    land_district VARCHAR,
+    land_lot VARCHAR,
+    status_reason VARCHAR,
+    county_precinct_id VARCHAR,
+    city_precinct_id VARCHAR,
+    congressional_district VARCHAR,
+    senate_district VARCHAR,
+    house_district VARCHAR,
+    judicial_district VARCHAR,
+    commission_district VARCHAR,
+    school_district VARCHAR,
+    county_districta_name VARCHAR,
+    county_districta_value VARCHAR,
+    county_districtb_name VARCHAR,
+    county_districtb_value VARCHAR,
+    municipal_name VARCHAR,
+    municipal_code VARCHAR,
+    ward_city_council_name VARCHAR,
+    ward_city_council_code VARCHAR,
+    city_school_district_name VARCHAR,
+    city_school_district_value VARCHAR,
+    city_dista_name VARCHAR,
+    city_dista_value VARCHAR,
+    city_distb_name VARCHAR,
+    city_distb_value VARCHAR,
+    city_distc_name VARCHAR,
+    city_distc_value VARCHAR,
+    city_distd_name VARCHAR,
+    city_distd_value VARCHAR,
+    date_last_voted TIMESTAMP,
+    party_last_voted VARCHAR,
+    date_added TIMESTAMP,
+    date_changed TIMESTAMP,
+    district_combo VARCHAR,
+    race_desc VARCHAR,
+    last_contact_date TIMESTAMP);
+    
+    
+COMMENT ON TABLE public.voter_all_data IS 'voter data for all Georgia, USA';
 
-			// If an error occurs, abort and return an error message
-			// if ('error' in possibleValuesResult) {
-			// 	return { error: "Something went wrong while finding possible values for the columns." };
-			// }
-
-			ddls.push({
-				ddl: row.tableDdl,
-				possibleValuesForColumns: [],
-				// possibleValuesForColumns: possibleValuesResult.possibleValues
-			});
-		}
-
-		return { ddls };
+COMMENT ON COLUMN public.voter_all_data.county_code IS 'County code of the voter';
+COMMENT ON COLUMN public.voter_all_data.registration_number IS 'Registration number of the voter';
+COMMENT ON COLUMN public.voter_all_data.voter_status IS 'Status of the voter registration';
+COMMENT ON COLUMN public.voter_all_data.residence_city IS 'City of residence of the voter';
+COMMENT ON COLUMN public.voter_all_data.residence_zipcode IS 'Zip code of the voter''s residence';
+COMMENT ON COLUMN public.voter_all_data.birthyear IS 'Birth year of the voter';
+COMMENT ON COLUMN public.voter_all_data.registration_date IS 'Date of voter registration';
+COMMENT ON COLUMN public.voter_all_data.race IS 'Race of the voter';
+COMMENT ON COLUMN public.voter_all_data.gender IS 'Gender of the voter';
+COMMENT ON COLUMN public.voter_all_data.land_district IS 'Land district information';
+COMMENT ON COLUMN public.voter_all_data.land_lot IS 'Land lot information';
+COMMENT ON COLUMN public.voter_all_data.status_reason IS 'Reason for status change';
+COMMENT ON COLUMN public.voter_all_data.county_precinct_id IS 'County precinct ID';
+COMMENT ON COLUMN public.voter_all_data.city_precinct_id IS 'City precinct ID';
+COMMENT ON COLUMN public.voter_all_data.congressional_district IS 'Congressional district of the voter';
+COMMENT ON COLUMN public.voter_all_data.senate_district IS 'Senate district of the voter';
+COMMENT ON COLUMN public.voter_all_data.house_district IS 'House district of the voter';
+COMMENT ON COLUMN public.voter_all_data.judicial_district IS 'Judicial district of the voter';
+COMMENT ON COLUMN public.voter_all_data.commission_district IS 'Commission district of the voter';
+COMMENT ON COLUMN public.voter_all_data.school_district IS 'School district of the voter';
+COMMENT ON COLUMN public.voter_all_data.county_districta_name IS 'Name of county district A';
+COMMENT ON COLUMN public.voter_all_data.county_districta_value IS 'Value of county district A';
+COMMENT ON COLUMN public.voter_all_data.county_districtb_name IS 'Name of county district B';
+COMMENT ON COLUMN public.voter_all_data.county_districtb_value IS 'Value of county district B';
+COMMENT ON COLUMN public.voter_all_data.municipal_name IS 'Name of the municipality';
+COMMENT ON COLUMN public.voter_all_data.municipal_code IS 'Code of the municipality';
+COMMENT ON COLUMN public.voter_all_data.ward_city_council_name IS 'Name of ward city council';
+COMMENT ON COLUMN public.voter_all_data.ward_city_council_code IS 'Code of ward city council';
+COMMENT ON COLUMN public.voter_all_data.city_school_district_name IS 'Name of city school district';
+COMMENT ON COLUMN public.voter_all_data.city_school_district_value IS 'Value of city school district';
+COMMENT ON COLUMN public.voter_all_data.city_dista_name IS 'Name of city district A';
+COMMENT ON COLUMN public.voter_all_data.city_dista_value IS 'Value of city district A';
+COMMENT ON COLUMN public.voter_all_data.city_distb_name IS 'Name of city district B';
+COMMENT ON COLUMN public.voter_all_data.city_distb_value IS 'Value of city district B';
+COMMENT ON COLUMN public.voter_all_data.city_distc_name IS 'Name of city district C';
+COMMENT ON COLUMN public.voter_all_data.city_distc_value IS 'Value of city district C';
+COMMENT ON COLUMN public.voter_all_data.city_distd_name IS 'Name of city district D';
+COMMENT ON COLUMN public.voter_all_data.city_distd_value IS 'Value of city district D';
+COMMENT ON COLUMN public.voter_all_data.date_last_voted IS 'Date when the voter last voted';
+COMMENT ON COLUMN public.voter_all_data.party_last_voted IS 'Party the voter last voted for';
+COMMENT ON COLUMN public.voter_all_data.date_added IS 'Date when the voter was added';
+COMMENT ON COLUMN public.voter_all_data.date_changed IS 'Date when voter information was last changed';
+COMMENT ON COLUMN public.voter_all_data.district_combo IS 'District combination information';
+COMMENT ON COLUMN public.voter_all_data.race_desc IS 'Description of the voter''s race';
+COMMENT ON COLUMN public.voter_all_data.last_contact_date IS 'Date of the last contact with the voter';
+"`
+		})
+		return {ddls};
 	} catch (error) {
 		console.error("Error fetching table DDLs:", error);
 		return {

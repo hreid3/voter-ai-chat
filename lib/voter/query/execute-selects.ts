@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { tool } from "ai";
-import postgres from 'postgres';
+import { sql } from '@/lib/voter/db'
 
 type ReturnType = {
   results: string[],
@@ -19,7 +19,6 @@ export const executeSelects = async ({ selects = [] }: { selects: string[] }):
 	try {
 		console.log("Called executeSelects", selects);
 		const connectionString = process.env.PG_VOTERDATA_URL || 'fail-badly';
-		const sql = postgres(connectionString);
 
 		// Validate that all queries are SELECT statements using RegEx
 		const isSelectOnly = selects.every((query) => /^SELECT\s+/i.test(query.trim()));

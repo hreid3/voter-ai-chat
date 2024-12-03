@@ -33,7 +33,7 @@ const allTools: AllowedTools[] = [...blocksTools, ...weatherTools];
 export async function POST(request: Request) {
 	const {
 		id,
-		messages,
+		messages: originMessages,
 		modelId,
 	}: { id: string; messages: Array<Message>; modelId: string } =
 		await request.json();
@@ -49,6 +49,7 @@ export async function POST(request: Request) {
 	if (!model) {
 		return new Response('Model not found', {status: 404});
 	}
+	const messages = originMessages.filter(v => !(v.toolInvocations?.length && v.toolInvocations?.find((u: any) => !u?.result)))
 
 	const coreMessages = convertToCoreMessages(messages);
 	const userMessage = getMostRecentUserMessage(coreMessages);
