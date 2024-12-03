@@ -7,8 +7,15 @@ import { generateUUID, getMostRecentUserMessage, sanitizeResponseMessages, } fro
 
 import { generateTitleFromUserMessage } from '../../actions';
 import { getVoterAiChatUiToolset } from "@/lib/voter/query/voter-ui-toolset";
-import { voterAssistantSystemMessage } from "@/lib/voter/query/prompt-engineering";
 import { openai } from "@ai-sdk/openai";
+
+import type { CoreSystemMessage } from "ai";
+import voterAiAssistantSystemMessage from '@/lib/voter/prompt-engineering/voter-ai-agent-system-message.md';
+
+ const voterAssistantSystemMessage: CoreSystemMessage = {
+	role: "system",
+	content: voterAiAssistantSystemMessage
+}
 
 // const maxDuration = 60;
 
