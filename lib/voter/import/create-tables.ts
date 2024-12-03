@@ -1,4 +1,4 @@
-import postgres from 'postgres';
+import postgres, { type Sql } from 'postgres';
 import type { TableInfo, VoterTableDdl } from "@/lib/voter/import/types";
 
 const sanitizeName = (name: string): string => {
@@ -39,7 +39,7 @@ $$;
 };
 
 export const dropAllTables = async () => {
-	let sql;
+	let sql: Sql;
 	try {
 		const connectionString = process.env.PG_VOTERDATA_URL;
 		if (!connectionString) {
@@ -49,13 +49,15 @@ export const dropAllTables = async () => {
 		sql = postgres(connectionString);
 		console.log("Dropping all tables from DB.");
 		const schema = process.env.PG_VOTERDATA_SCHEMA || 'needs-schema';
-		await sql.unsafe(generateDropAllObjectsSQL(schema));
+		try {
+			await sql.unsafe(generateDropAllObjectsSQL(schema));
+		} finally {
+			await sql?.end({ timeout: 5 });
+		}
 		console.log('SQL script executed successfully');
 	} catch ( error ) {
 		console.error('Error executing SQL script:', error);
 		throw error;
-	} finally {
-		await sql?.end({ timeout: 5 });
 	}
 }
 
@@ -151,8 +153,6 @@ export const createVoterDataTables = async (
 		// No indexes are added at this point for the embedding table for better insert performance
 	}
 
-	// const dropAllObjectsSQL = generateDropAllObjectsSQL(schema);
-	// sqlScript = `${dropAllObjectsSQL}\n${sqlScript}`;
 	await executeSQL(sqlScript);
 	console.log('CREATED TABLE Statements:');
 	tableDdls.forEach((stmt) => {
