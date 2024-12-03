@@ -6,7 +6,6 @@ import { streamText, tool } from 'ai';
 import { config } from "dotenv";
 import path from "node:path";
 import { readStreamToConsole } from "@/lib/utils";
-import { voterAssistantSystemMessage } from "@/lib/voter/query/prompt-engineering";
 
 config({
     path: ['.env.local', path.join(__dirname, '../../../.env.local')],
@@ -33,33 +32,3 @@ const weatherTool = tool({
     }),
     execute: fetchWeather
 });
-
-(async () => {
-    const {textStream} = await streamText({
-        model: openai('gpt-3.5-turbo'),
-        maxSteps: 5,
-        temperature: 0,
-        messages: [
-            voterAssistantSystemMessage,
-            {role: 'user', content: 'How many non-voters are out there?'},
-            // {role: 'user', content: 'Where there any voters that changed status in 2020?'},
-        ],
-        tools: {
-            weather: weatherTool,
-
-        }
-    });
-    await readStreamToConsole(textStream)
-    process.exit(0);
-
-    // const object= await generateObject({
-    //     model: openai('gpt-4o', { structuredOutputs: true }),
-    //     schema: z.object({
-    //         recipe: z.string().describe("A title of a recipe")
-    //     }),
-    //     messages: [
-    //         {role: 'system', content: 'You are a football player that cannot cook except for scrambled eggs'},
-    //         {role: 'user', content: 'Write a vegetarian lasagna recipe for 4 people.'}
-    //     ],
-    // })
-})();
