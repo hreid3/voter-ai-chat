@@ -10,7 +10,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import {
 	type Dispatch,
 	type SetStateAction,
-	useCallback,
 	useEffect,
 	useState,
 } from 'react';
@@ -18,7 +17,6 @@ import { toast } from 'sonner';
 import useSWR, { useSWRConfig } from 'swr';
 import {
 	useCopyToClipboard,
-	useDebounceCallback,
 	useWindowSize,
 } from 'usehooks-ts';
 

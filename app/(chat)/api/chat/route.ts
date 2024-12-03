@@ -1,4 +1,4 @@
-import { convertToCoreMessages, type Message, StreamData, streamText, } from 'ai';
+import { convertToCoreMessages, type Message, StreamData, streamText,  type CoreSystemMessage } from 'ai';
 import { auth } from '@/app/(auth)/auth';
 import { models } from '@/lib/ai/models';
 import { deleteChatById, getChatById, saveChat, saveMessages, } from '@/lib/db/queries';
@@ -6,7 +6,7 @@ import { generateUUID, getMostRecentUserMessage, sanitizeResponseMessages, } fro
 import { generateTitleFromUserMessage } from '../../actions';
 import { getVoterAiChatUiToolset } from "@/lib/voter/query/voter-ui-toolset";
 import { openai } from "@ai-sdk/openai";
-import type { CoreSystemMessage } from "ai";
+
 import voterAiAssistantSystemMessage from '@/lib/voter/prompt-engineering/voter-ai-agent-system-message.md';
 
 const voterAssistantSystemMessage: CoreSystemMessage = {
