@@ -20,7 +20,9 @@ import {Overview} from './overview';
 
 export const hideToolUiList = [
   "fetchTableDdls",
-  "executeSelects"
+  "executeSelects",
+	"listVoterDataMappingKeysTool",
+	"voterDataColumnLookupTool",
 ];
 
 export function Chat({

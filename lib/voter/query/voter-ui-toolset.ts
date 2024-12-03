@@ -9,7 +9,6 @@ export const getVoterAiChatUiToolset = () => {
 		listVoterDataMappingKeysTool,
 		fetchTableDdls: fetchTableDdlTool,
 		voterDataColumnLookupTool: fetchVoterDataColumnLookupTool,
-		// findPossibleSimilarValues: findPossibleSimilarValuesTool,
 		executeSelects: executeSelectsTool,
 		errorMessageTool: {
 			description: "A utility tool to process and handle error messages returned by any other tool. It helps capture, log, and communicate error messages effectively in a structured manner.",

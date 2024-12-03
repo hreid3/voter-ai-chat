@@ -29,15 +29,15 @@ import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 
 const suggestedActions = [
+	{
+		title: 'What voter ',
+		label: 'data is available?',
+		action: 'What voter registration data is available?',
+	},
   {
     title: 'How many voters',
     label: 'are in the state of Georgia?',
     action: 'How many state Georgians are registered voters?',
-  },
-  {
-    title: 'How many voters ',
-    label: 'are registered in the city of Atlanta?',
-    action: 'How many voters are registered in the city of Atlanta?',
   },
 ];
 
