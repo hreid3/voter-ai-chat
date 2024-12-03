@@ -8,12 +8,10 @@ import type { Dispatch, SetStateAction } from 'react';
 import type { Vote } from '@/lib/db/schema';
 
 import type { UIBlock } from './block';
-import { DocumentToolCall, DocumentToolResult } from './document';
 import { SparklesIcon } from './icons';
 import { Markdown } from './markdown';
 import { MessageActions } from './message-actions';
 import { PreviewAttachment } from './preview-attachment';
-import { Weather } from './weather';
 import ErrorBubble from "@/components/ui/error-bubble";
 
 export const PreviewMessage = ({
@@ -65,30 +63,7 @@ export const PreviewMessage = ({
 
                   return (
                     <div key={toolCallId}>
-                      {toolName === 'getWeather' ? (
-                        <Weather weatherAtLocation={result} />
-                      ) : toolName === 'createDocument' ? (
-                        <DocumentToolResult
-                          type="create"
-                          result={result}
-                          block={block}
-                          setBlock={setBlock}
-                        />
-                      ) : toolName === 'updateDocument' ? (
-                        <DocumentToolResult
-                          type="update"
-                          result={result}
-                          block={block}
-                          setBlock={setBlock}
-                        />
-                      ) : toolName === 'requestSuggestions' ? (
-                        <DocumentToolResult
-                          type="request-suggestions"
-                          result={result}
-                          block={block}
-                          setBlock={setBlock}
-                        />
-                      ) : toolName === 'errorMessageTool' ? (
+                      {toolName === 'errorMessageTool' ? (
 												<ErrorBubble message={args?.errorMessage || "Error Message"} />
 											) : (
                         <pre>{JSON.stringify(result, null, 2)}</pre>
@@ -103,27 +78,6 @@ export const PreviewMessage = ({
                       skeleton: ['getWeather'].includes(toolName),
                     })}
                   >
-                    {toolName === 'getWeather' ? (
-                      <Weather />
-                    ) : toolName === 'createDocument' ? (
-                      <DocumentToolCall
-                        type="create"
-                        args={args}
-                        setBlock={setBlock}
-                      />
-                    ) : toolName === 'updateDocument' ? (
-                      <DocumentToolCall
-                        type="update"
-                        args={args}
-                        setBlock={setBlock}
-                      />
-                    ) : toolName === 'requestSuggestions' ? (
-                      <DocumentToolCall
-                        type="request-suggestions"
-                        args={args}
-                        setBlock={setBlock}
-                      />
-                    ) : null }
                   </div>
                 );
               })}
