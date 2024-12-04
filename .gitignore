@@ -40,5 +40,5 @@ yarn-error.log*
 .vercel
 .env*.local
 .idea/
-./public/uploads
 .vercel
+/public/uploads/

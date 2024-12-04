@@ -1,22 +1,30 @@
 'use client';
 
-import type { Attachment, Message } from 'ai';
-import { useChat } from 'ai/react';
-import { AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
-import useSWR, { useSWRConfig } from 'swr';
-import { useWindowSize } from 'usehooks-ts';
+import type {Attachment, Message} from 'ai';
+import {useChat} from 'ai/react';
+import {AnimatePresence} from 'framer-motion';
+import {useState} from 'react';
+import useSWR, {useSWRConfig} from 'swr';
+import {useWindowSize} from 'usehooks-ts';
 
-import { ChatHeader } from '@/components/chat-header';
-import { PreviewMessage, ThinkingMessage } from '@/components/message';
-import { useScrollToBottom } from '@/components/use-scroll-to-bottom';
-import type { Vote } from '@/lib/db/schema';
-import { fetcher } from '@/lib/utils';
+import {ChatHeader} from '@/components/chat-header';
+import {PreviewMessage, ThinkingMessage} from '@/components/message';
+import {useScrollToBottom} from '@/components/use-scroll-to-bottom';
+import type {Vote} from '@/lib/db/schema';
+import {fetcher} from '@/lib/utils';
 
-import { Block, type UIBlock } from './block';
-import { BlockStreamHandler } from './block-stream-handler';
-import { MultimodalInput } from './multimodal-input';
-import { Overview } from './overview';
+import {Block, type UIBlock} from './block';
+import {BlockStreamHandler} from './block-stream-handler';
+import {MultimodalInput} from './multimodal-input';
+import {Overview} from './overview';
+
+export const hideToolUiList = [
+  "fetchTableDdls",
+  "executeSelects",
+	"listVoterDataMappingKeysTool",
+	"voterDataColumnLookupTool",
+	"fetchStaticMapTool",
+];
 
 export function Chat({
   id,
@@ -30,7 +38,7 @@ export function Chat({
   const { mutate } = useSWRConfig();
 
   const {
-    messages,
+    messages: originalMessages,
     setMessages,
     handleSubmit,
     input,
@@ -46,6 +54,10 @@ export function Chat({
       mutate('/api/history');
     },
   });
+  const messages = originalMessages
+      .filter(v => !(v.toolInvocations
+          ?.find(u => hideToolUiList
+              ?.some(t => t === u.toolName))))
 
   const { width: windowWidth = 1920, height: windowHeight = 1080 } =
     useWindowSize();

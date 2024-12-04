@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "sourceMap": true,
     "target": "ESNext",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
@@ -23,6 +24,7 @@
     }
   },
   "include": [
+    "types/markdown.d.ts",
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",

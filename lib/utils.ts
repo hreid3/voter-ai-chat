@@ -222,3 +222,9 @@ export function getMessageIdFromAnnotations(message: Message) {
   // @ts-expect-error messageIdFromServer is not defined in MessageAnnotation
   return annotation.messageIdFromServer;
 }
+
+export async function readStreamToConsole(readable: any) {
+  for await (const chunk of readable) {
+    process.stdout.write(chunk);
+  }
+}

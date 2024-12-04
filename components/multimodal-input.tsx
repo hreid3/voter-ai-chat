@@ -23,21 +23,21 @@ import { useLocalStorage, useWindowSize } from 'usehooks-ts';
 
 import { sanitizeUIMessages } from '@/lib/utils';
 
-import { ArrowUpIcon, PaperclipIcon, StopIcon } from './icons';
+import { ArrowUpIcon, StopIcon } from './icons';
 import { PreviewAttachment } from './preview-attachment';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 
 const suggestedActions = [
+	{
+		title: 'What voter ',
+		label: 'data is available?',
+		action: 'What voter registration data is available?',
+	},
   {
-    title: 'What is the weather',
-    label: 'in San Francisco?',
-    action: 'What is the weather in San Francisco?',
-  },
-  {
-    title: 'Help me draft an essay',
-    label: 'about Silicon Valley',
-    action: 'Help me draft a short essay about Silicon Valley',
+    title: 'How many voters',
+    label: 'are in the state of Georgia?',
+    action: 'How many state Georgians are registered voters?',
   },
 ];
 
@@ -310,17 +310,17 @@ export function MultimodalInput({
         </Button>
       )}
 
-      <Button
-        className="rounded-full p-1.5 h-fit absolute bottom-2 right-11 m-0.5 dark:border-zinc-700"
-        onClick={(event) => {
-          event.preventDefault();
-          fileInputRef.current?.click();
-        }}
-        variant="outline"
-        disabled={isLoading}
-      >
-        <PaperclipIcon size={14} />
-      </Button>
+      {/*<Button*/}
+      {/*  className="rounded-full p-1.5 h-fit absolute bottom-2 right-11 m-0.5 dark:border-zinc-700"*/}
+      {/*  onClick={(event) => {*/}
+      {/*    event.preventDefault();*/}
+      {/*    fileInputRef.current?.click();*/}
+      {/*  }}*/}
+      {/*  variant="outline"*/}
+      {/*  disabled={isLoading}*/}
+      {/*>*/}
+      {/*  <PaperclipIcon size={14} />*/}
+      {/*</Button>*/}
     </div>
   );
 }

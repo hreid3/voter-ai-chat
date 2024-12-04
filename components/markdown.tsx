@@ -2,6 +2,7 @@ import Link from 'next/link';
 import React, { memo } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import '../styles/table-styles.css';
 
 const NonMemoizedMarkdown = ({ children }: { children: string }) => {
   const components: Partial<Components> = {
@@ -108,6 +109,15 @@ const NonMemoizedMarkdown = ({ children }: { children: string }) => {
         </h6>
       );
     },
+		table: ({ node, children, ...props }) => {
+			return (
+				<div className="styled-table">
+					<table {...props}>
+						{children}
+					</table>
+				</div>
+			);
+		},
   };
 
   return (
