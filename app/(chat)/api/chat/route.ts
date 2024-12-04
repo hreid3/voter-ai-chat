@@ -8,29 +8,12 @@ import { getVoterAiChatUiToolset } from "@/lib/voter/query/voter-ui-toolset";
 import { openai } from "@ai-sdk/openai";
 
 import voterAiAssistantSystemMessage from '@/lib/voter/prompt-engineering/voter-ai-agent-system-message.md';
+import { fetchStaticMapTool } from "@/lib/tools/fetchStaticMapTool";
 
 const voterAssistantSystemMessage: CoreSystemMessage = {
 	role: "system",
 	content: voterAiAssistantSystemMessage
 }
-
-type AllowedTools =
-	| 'createDocument'
-	| 'updateDocument'
-	| 'requestSuggestions'
-	| 'getWeather'
-	| 'sayHello'
-
-const blocksTools: AllowedTools[] = [
-	'createDocument',
-	'updateDocument',
-	'requestSuggestions',
-	'sayHello',
-];
-
-const weatherTools: AllowedTools[] = ['getWeather'];
-
-const allTools: AllowedTools[] = [...blocksTools, ...weatherTools];
 
 export async function POST(request: Request) {
 	const {
@@ -86,6 +69,7 @@ export async function POST(request: Request) {
 		// experimental_activeTools: allTools,
 		tools: {
 			...getVoterAiChatUiToolset(),
+			fetchStaticMapTool,
 		},
 		onFinish: async ({response: {messages: responseMessages}}) => {
 			if (session.user?.id) {
