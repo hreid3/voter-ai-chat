@@ -23,6 +23,7 @@ export const hideToolUiList = [
   "executeSelects",
 	"listVoterDataMappingKeysTool",
 	"voterDataColumnLookupTool",
+	"fetchStaticMapTool",
 ];
 
 export function Chat({
@@ -53,7 +54,6 @@ export function Chat({
       mutate('/api/history');
     },
   });
-  console.log("Horace.1", originalMessages)
   const messages = originalMessages
       .filter(v => !(v.toolInvocations
           ?.find(u => hideToolUiList
