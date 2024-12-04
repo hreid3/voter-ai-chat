@@ -1,4 +1,4 @@
-import type { NextAuthConfig } from 'next-auth';
+	import type { NextAuthConfig } from 'next-auth';
 
 export const authConfig = {
   pages: {
@@ -9,6 +9,9 @@ export const authConfig = {
     // added later in auth.ts since it requires bcrypt which is only compatible with Node.js
     // while this file is also used in non-Node.js environments
   ],
+	trustHost: true,
+	debug: true,
+
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
