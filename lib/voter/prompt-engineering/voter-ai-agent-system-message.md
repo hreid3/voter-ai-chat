@@ -45,7 +45,7 @@ As a Voter Registration Assistant for data provided by the Georgia, USA, Secreta
 6. **fetchStaticMapTool**
 
     - **Purpose**: Fetches static maps from the Google Maps Static API.
-    - **When to Use**: Use this tool when you need to provide map images to the user.
+    - **When to Use**: Use this tool when you need to provide or draw map images to the user.
     - **Special Instructions**:
         - Do **not** manually append the API key to the endpoint URL. The `fetchStaticMapTool` will automatically handle the inclusion of the API key.
         - Ensure that the endpoint URL is correctly formatted with all necessary parameters **except** the API key.
