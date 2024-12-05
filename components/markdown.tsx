@@ -1,12 +1,19 @@
 import Link from 'next/link';
-import React, { memo } from 'react';
+import React, { memo, useLayoutEffect, useRef, useState } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import '../styles/table-styles.css';
 
-const NonMemoizedMarkdown = ({ children, streaming }: { children: string, streaming: boolean }) => {
+const NonMemoizedMarkdown = ({ children, streaming = true }: { children: string, streaming: boolean }) => {
+	const [initialized, setInitialized] = useState<boolean>(false);
+	useLayoutEffect(() => {
+		if (!initialized && !streaming) {
+			setInitialized(true)
+		}
+	}, [streaming])
   const components: Partial<Components> = {
     // @ts-expect-error
+
     code: ({ node, inline, className, children, ...props }) => {
       const match = /language-(\w+)/.exec(className || '');
       return !inline && match ? (
@@ -62,17 +69,20 @@ const NonMemoizedMarkdown = ({ children, streaming }: { children: string, stream
 			);
 		},
     a: ({ node, children, ...props }) => {
-      return (
-        // @ts-expect-error
-				<Link
-          className="text-blue-500 hover:underline"
-          target="_blank"
-          rel="noreferrer"
-          {...props}
-        >
-          {children}
-				</Link>
-      );
+      return initialized ?  (
+				<a {...props}>{children}</a>
+				// TODO::  We need to add this back.
+				// <Link
+        //   className="text-blue-500 hover:underline"
+        //   target="_blank"
+        //   rel="noreferrer"
+        //   {...props}
+        // >
+        //   {children}
+				// </Link>
+      ) : (
+				"processing...."
+			);
     },
     h1: ({ node, children, ...props }) => {
       return (
@@ -126,7 +136,9 @@ const NonMemoizedMarkdown = ({ children, streaming }: { children: string, stream
 			);
 		},
   };
-
+	// if (!initialized) {
+	// 	return <div>Waiit....</div>
+	// }
   return (
     <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
       {children}
