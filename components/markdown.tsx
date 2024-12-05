@@ -1,5 +1,5 @@
-import Link from 'next/link';
-import React, { memo, useLayoutEffect, useRef, useState } from 'react';
+
+import React, { memo, useLayoutEffect, useState } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import '../styles/table-styles.css';
