@@ -4,7 +4,7 @@ import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import '../styles/table-styles.css';
 
-const NonMemoizedMarkdown = ({ children }: { children: string }) => {
+const NonMemoizedMarkdown = ({ children, streaming }: { children: string, streaming: boolean }) => {
   const components: Partial<Components> = {
     // @ts-expect-error
     code: ({ node, inline, className, children, ...props }) => {
@@ -54,17 +54,24 @@ const NonMemoizedMarkdown = ({ children }: { children: string }) => {
         </span>
       );
     },
+		img: ({ node, children, ...props }) => {
+			return (
+				<span className="font-semibold overflow-x-clip">
+          <img {...props} aria-label="A Generated AI Creation" />
+        </span>
+			);
+		},
     a: ({ node, children, ...props }) => {
       return (
         // @ts-expect-error
-        <Link
+				<Link
           className="text-blue-500 hover:underline"
           target="_blank"
           rel="noreferrer"
           {...props}
         >
           {children}
-        </Link>
+				</Link>
       );
     },
     h1: ({ node, children, ...props }) => {
@@ -129,5 +136,5 @@ const NonMemoizedMarkdown = ({ children }: { children: string }) => {
 
 export const Markdown = memo(
   NonMemoizedMarkdown,
-  (prevProps, nextProps) => prevProps.children === nextProps.children,
+  (prevProps, nextProps) => prevProps.children === nextProps.children && prevProps.streaming === nextProps.streaming,
 );

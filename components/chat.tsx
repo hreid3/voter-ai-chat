@@ -36,7 +36,7 @@ export function Chat({
   selectedModelId: string;
 }) {
   const { mutate } = useSWRConfig();
-
+	const [streaming,setStreaming] = useState(false);
   const {
     messages: originalMessages,
     setMessages,
@@ -47,18 +47,18 @@ export function Chat({
     isLoading,
     stop,
     data: streamingData,
+		error,
   } = useChat({
     body: { id, modelId: selectedModelId },
     initialMessages,
+		onResponse: () => {
+			setStreaming(true);
+		},
     onFinish: () => {
       mutate('/api/history');
+			setStreaming(false)
     },
   });
-  const messages = originalMessages
-      .filter(v => !(v.toolInvocations
-          ?.find(u => hideToolUiList
-              ?.some(t => t === u.toolName))))
-
   const { width: windowWidth = 1920, height: windowHeight = 1080 } =
     useWindowSize();
 
@@ -85,6 +85,10 @@ export function Chat({
     useScrollToBottom<HTMLDivElement>();
 
   const [attachments, setAttachments] = useState<Array<Attachment>>([]);
+	const messages = originalMessages
+		.filter(v => !(v.toolInvocations
+			?.find(u => hideToolUiList
+				?.some(t => t === u.toolName))))
 
   return (
     <>
@@ -104,6 +108,7 @@ export function Chat({
               block={block}
               setBlock={setBlock}
               isLoading={isLoading && messages.length - 1 === index}
+							streaming={streaming}
               vote={
                 votes
                   ? votes.find((vote) => vote.messageId === message.id)

@@ -22,7 +22,14 @@ import {
 // https://authjs.dev/reference/adapter/drizzle
 
 // biome-ignore lint: Forbidden non-null assertion.
-const client = postgres(process.env.POSTGRES_URL!);
+const client = postgres(process.env.POSTGRES_URL!, {
+	max: 5,
+	max_lifetime: 20,
+	idle_timeout: 10,
+	// debug: (connection, query, parameters, paramTypes) => {
+	// 	console.log("Horace.connections", connection.toString());
+	// }
+});
 const db = drizzle(client);
 
 export async function getUser(email: string): Promise<Array<User>> {
