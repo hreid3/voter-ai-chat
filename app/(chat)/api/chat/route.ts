@@ -14,6 +14,7 @@ const voterAssistantSystemMessage: CoreSystemMessage = {
 	role: "system",
 	content: voterAiAssistantSystemMessage
 }
+export const maxDuration = 60; // This function can run for a maximum of 30 seconds
 
 export async function POST(request: Request) {
 	try {
