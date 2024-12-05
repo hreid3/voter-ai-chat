@@ -21,6 +21,7 @@ export const PreviewMessage = ({
 																 setBlock,
 																 vote,
 																 isLoading,
+																 streaming,
 															 }: {
 	chatId: string;
 	message: Message;
@@ -28,6 +29,7 @@ export const PreviewMessage = ({
 	setBlock: Dispatch<SetStateAction<UIBlock>>;
 	vote: Vote | undefined;
 	isLoading: boolean;
+	streaming: boolean;
 }) => {
 	return (
 		<motion.div
@@ -47,10 +49,10 @@ export const PreviewMessage = ({
 					</div>
 				)}
 
-				<div className="flex flex-col gap-2 w-full">
+				<div className="flex flex-col gap-2 w-full overflow-x-hidden">
 					{message.content && (
 						<div className="flex flex-col gap-4">
-							<Markdown>{message.content as string}</Markdown>
+							<Markdown streaming={streaming}>{message.content as string}</Markdown>
 						</div>
 					)}
 

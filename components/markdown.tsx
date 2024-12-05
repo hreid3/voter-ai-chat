@@ -1,12 +1,19 @@
-import Link from 'next/link';
-import React, { memo } from 'react';
+
+import React, { memo, useLayoutEffect, useState } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import '../styles/table-styles.css';
 
-const NonMemoizedMarkdown = ({ children }: { children: string }) => {
+const NonMemoizedMarkdown = ({ children, streaming = true }: { children: string, streaming: boolean }) => {
+	const [initialized, setInitialized] = useState<boolean>(false);
+	useLayoutEffect(() => {
+		if (!initialized && !streaming) {
+			setInitialized(true)
+		}
+	}, [streaming])
   const components: Partial<Components> = {
     // @ts-expect-error
+
     code: ({ node, inline, className, children, ...props }) => {
       const match = /language-(\w+)/.exec(className || '');
       return !inline && match ? (
@@ -54,18 +61,28 @@ const NonMemoizedMarkdown = ({ children }: { children: string }) => {
         </span>
       );
     },
+		img: ({ node, children, ...props }) => {
+			return (
+				<span className="font-semibold overflow-x-clip">
+          <img {...props} aria-label="A Generated AI Creation" />
+        </span>
+			);
+		},
     a: ({ node, children, ...props }) => {
-      return (
-        // @ts-expect-error
-        <Link
-          className="text-blue-500 hover:underline"
-          target="_blank"
-          rel="noreferrer"
-          {...props}
-        >
-          {children}
-        </Link>
-      );
+      return initialized ?  (
+				<a {...props}>{children}</a>
+				// TODO::  We need to add this back.
+				// <Link
+        //   className="text-blue-500 hover:underline"
+        //   target="_blank"
+        //   rel="noreferrer"
+        //   {...props}
+        // >
+        //   {children}
+				// </Link>
+      ) : (
+				"processing...."
+			);
     },
     h1: ({ node, children, ...props }) => {
       return (
@@ -119,7 +136,9 @@ const NonMemoizedMarkdown = ({ children }: { children: string }) => {
 			);
 		},
   };
-
+	// if (!initialized) {
+	// 	return <div>Waiit....</div>
+	// }
   return (
     <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
       {children}
@@ -129,5 +148,5 @@ const NonMemoizedMarkdown = ({ children }: { children: string }) => {
 
 export const Markdown = memo(
   NonMemoizedMarkdown,
-  (prevProps, nextProps) => prevProps.children === nextProps.children,
+  (prevProps, nextProps) => prevProps.children === nextProps.children && prevProps.streaming === nextProps.streaming,
 );
