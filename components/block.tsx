@@ -62,6 +62,7 @@ export function Block({
 												messages,
 												setMessages,
 												votes,
+												streaming,
 											}: {
 	chatId: string;
 	input: string;
@@ -75,6 +76,7 @@ export function Block({
 	messages: Array<Message>;
 	setMessages: Dispatch<SetStateAction<Array<Message>>>;
 	votes: Array<Vote> | undefined;
+	streaming: boolean,
 	append: (
 		message: Message | CreateMessage,
 		chatRequestOptions?: ChatRequestOptions,
@@ -229,6 +231,7 @@ export function Block({
 									message={message}
 									block={block}
 									setBlock={setBlock}
+									streaming={streaming}
 									isLoading={isLoading && index === messages.length - 1}
 									vote={
 										votes
