@@ -135,7 +135,7 @@ export function Chat({
 						className="shrink-0 min-w-[24px] min-h-[24px]"
 					/>
 				</div>
-				<form className="flex mx-auto px-4 bg-background pb-4 md:pb-6 gap-2 w-full md:max-w-3xl">
+				<form className="flex mx-auto px-4 bg-background pb-3 md:pb-2 gap-2 w-full md:max-w-3xl">
 					<MultimodalInput
 						chatId={id}
 						input={input}
@@ -150,6 +150,7 @@ export function Chat({
 						append={append}
 					/>
 				</form>
+				<div  className="pb-1.5 text-center text-sm">Developed by <a className="text-blue-500 underline hover:text-blue-700"   href="mailto:horace.reid@bluenetreflections.com">Horace Reid III</a> @ 2024</div>
 			</div>
 
 			<AnimatePresence>

@@ -268,7 +268,7 @@ export function MultimodalInput({
         value={input}
         onChange={handleInput}
         className={cx(
-          'min-h-[24px] max-h-[calc(75dvh)] overflow-hidden resize-none rounded-xl text-base bg-muted',
+          'border-red min-h-[24px] max-h-[calc(75dvh)] overflow-hidden resize-none rounded-xl text-base bg-muted',
           className,
         )}
         rows={3}
@@ -299,7 +299,7 @@ export function MultimodalInput({
         </Button>
       ) : (
         <Button
-          className="rounded-full p-1.5 h-fit absolute bottom-2 right-2 m-0.5 border dark:border-zinc-600"
+          className="rounded-full p-1.5 h-fit absolute bottom-2 right-2 m-0.5 border dark:border-0"
           onClick={(event) => {
             event.preventDefault();
             submitForm();
