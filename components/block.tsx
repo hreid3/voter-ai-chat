@@ -370,7 +370,7 @@ export function Block({
 						</div>
 					</div>
 
-					<div className="flex flex-row gap-1">
+					<div className="flex flex-row gap-1 DO-NOT-JUMP-DOWN">
 						<Tooltip>
 							<TooltipTrigger asChild>
 								<Button

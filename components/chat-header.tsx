@@ -17,8 +17,7 @@ export function ChatHeader({ selectedModelId }: { selectedModelId: string }) {
     <header className="flex sticky top-0 bg-background py-1.5 items-center px-2 md:px-2 gap-2">
       <SidebarToggle />
       {(!open || windowWidth < 768) && (
-				<>
-        <BetterTooltip align="start" content="New Chat">
+				<BetterTooltip align="start" content="New Chat">
 					<span>
 						<Button
 							variant="outline"
@@ -34,7 +33,6 @@ export function ChatHeader({ selectedModelId }: { selectedModelId: string }) {
 						<img src="/images/original-logo.svg" alt="Voter AI Logo" className="inline-flex ml-4 w-28	" />
 					</span>
         </BetterTooltip>
-				</>
       )}
     </header>
   );

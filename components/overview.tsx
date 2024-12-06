@@ -1,7 +1,5 @@
 import { motion } from 'framer-motion';
 
-import { MessageIcon, } from './icons';
-
 export const Overview = () => {
   return (
     <motion.div
