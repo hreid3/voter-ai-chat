@@ -1,16 +1,10 @@
 
-import React, { memo, useLayoutEffect, useState } from 'react';
+import React, { memo, } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import '../styles/table-styles.css';
 
-const NonMemoizedMarkdown = ({ children, streaming = true }: { children: string, streaming: boolean }) => {
-	const [initialized, setInitialized] = useState<boolean>(false);
-	useLayoutEffect(() => {
-		if (!initialized && !streaming) {
-			setInitialized(true)
-		}
-	}, [streaming])
+const NonMemoizedMarkdown = ({ children }: { children: string, streaming?: boolean }) => {
   const components: Partial<Components> = {
     // @ts-expect-error
 
@@ -69,7 +63,7 @@ const NonMemoizedMarkdown = ({ children, streaming = true }: { children: string,
 			);
 		},
     a: ({ node, children, ...props }) => {
-      return initialized ?  (
+      return (
 				<a {...props}>{children}</a>
 				// TODO::  We need to add this back.
 				// <Link
@@ -80,9 +74,7 @@ const NonMemoizedMarkdown = ({ children, streaming = true }: { children: string,
         // >
         //   {children}
 				// </Link>
-      ) : (
-				"processing...."
-			);
+      );
     },
     h1: ({ node, children, ...props }) => {
       return (

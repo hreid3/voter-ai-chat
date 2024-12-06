@@ -1,7 +1,5 @@
 import { motion } from 'framer-motion';
 
-import { MessageIcon, } from './icons';
-
 export const Overview = () => {
   return (
     <motion.div
@@ -14,10 +12,9 @@ export const Overview = () => {
     >
 			<div className="rounded-xl p-6 flex flex-col gap-8 leading-relaxed text-center max-w-xl">
 				<p className="flex flex-row justify-center gap-1 items-center">
-					<MessageIcon size={32}/>
+					<img src="/images/original-logo.svg" className="w-[40ch]" alt="VoteAI logo"/>
 				</p>
 				<article className="">
-					<h1 className="text-3xl font-semibold my-2">Welcome to Voter AI Chat!</h1>
 					<p>{`
 						I'm here to help you find voter registration information for Georgia quickly and easily. Just ask
 						your questions, and I'll guide you with the data you need. This service is completely free and open to

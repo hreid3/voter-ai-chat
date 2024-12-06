@@ -21,6 +21,19 @@ const config: Config = {
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
+				red: {
+					DEFAULT: '#F74040', // Default red
+					50: '#FFECEC', // Lighter shades
+					100: '#FFD8D8',
+					200: '#FFB0B0',
+					300: '#FF8888',
+					400: '#FF6060',
+					500: '#F74040', // Main shade
+					600: '#DF3030',
+					700: '#B92020',
+					800: '#931010',
+					900: '#6D0000', // Darker shades
+				},
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
