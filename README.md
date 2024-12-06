@@ -1,4 +1,4 @@
-<h1>Voter AI Chatbot</h1>
+![Voter AI Chatbot)(./public/images/original-logo.svg)
 <p align="center">
   An Open-Source Voter AI Chat Template Built With Next.js and the AI SDK by Vercel.
 
