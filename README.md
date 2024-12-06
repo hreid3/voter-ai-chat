@@ -2,7 +2,7 @@
 
 ## Overview
 
-[VoteAI](http://voteai.chat) is a conversational web application designed to empower Georgia voters, election stakeholders, and campaign managers by providing timely, data-driven insights into voter registration and district information. The platform simulates a ChatGPT-like interface, enabling users to pose natural language queries, which are then transformed into SQL through a Retrieval Augmented Generation (RAG) pipeline. This approach allows VoteAI to present precise results drawn from a locally maintained database of voter registration records originally sourced from the Georgia Secretary of State. 
+[VoterAI](http://voterai.chat) is a conversational web application designed to empower Georgia voters, election stakeholders, and campaign managers by providing timely, data-driven insights into voter registration and district information. The platform simulates a ChatGPT-like interface, enabling users to pose natural language queries, which are then transformed into SQL through a Retrieval Augmented Generation (RAG) pipeline. This approach allows VoterAI to present precise results drawn from a locally maintained database of voter registration records originally sourced from the Georgia Secretary of State. 
 
 
 ### Key Features
@@ -16,7 +16,7 @@
 
 [//]: # (- **Verified Georgia Voter Data:**  )
 
-[//]: # (  Leverage data sourced directly from the Georgia Secretary of State. The records are periodically loaded into VoteAI’s own database, ensuring the platform remains current, accurate, and free from any dependency on direct external access.)
+[//]: # (  Leverage data sourced directly from the Georgia Secretary of State. The records are periodically loaded into VoterAI’s own database, ensuring the platform remains current, accurate, and free from any dependency on direct external access.)
 
 - **District & Representative Insights:**  
   Explore voter districts, learn about elected officials, and gain a clearer understanding of the political landscape. Identify patterns in voter distribution to better strategize engagement and outreach efforts.
@@ -36,7 +36,7 @@
 
 ### Getting Started
 
-Visit [http://voteai.chat](http://voteai.chat) to begin exploring voter data, learning about districts, and developing data-backed strategies.
+Visit [http://voterai.chat](http://voterai.chat) to begin exploring voter data, learning about districts, and developing data-backed strategies.
 
 
 ## Running VoterAI locally
