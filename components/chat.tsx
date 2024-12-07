@@ -19,14 +19,6 @@ import { MultimodalInput } from './multimodal-input';
 import { Overview } from './overview';
 import { toast } from 'sonner';
 
-export const hideToolUiList = [
-	"fetchTableDdls",
-	"executeSelects",
-	"listVoterDataMappingKeysTool",
-	"voterDataColumnLookupTool",
-	"fetchStaticMapTool",
-];
-
 export function Chat({
 											 id,
 											 initialMessages,
@@ -39,7 +31,7 @@ export function Chat({
 	const {mutate} = useSWRConfig();
 	const [streaming, setStreaming] = useState(false);
 	const {
-		messages: originalMessages,
+		messages,
 		setMessages,
 		handleSubmit,
 		input,
@@ -86,10 +78,6 @@ export function Chat({
 		useScrollToBottom<HTMLDivElement>();
 
 	const [attachments, setAttachments] = useState<Array<Attachment>>([]);
-	const messages = originalMessages
-		.filter(v => !(v.toolInvocations
-			?.find(u => hideToolUiList
-				?.some(t => t === u.toolName))))
 
 	useEffect(() => {
 		if (error) {
