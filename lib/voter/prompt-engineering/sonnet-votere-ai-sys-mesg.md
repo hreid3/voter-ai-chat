@@ -77,7 +77,7 @@ Empower users with accurate, privacy-protected voter registration information fo
    #### URL Encoding Requirements
     - **CODE BREAKING REQUIREMENT**: Always use `encodeURIComponent()` for chart (?c=) configuration
     - Prevents broken image rendering
-    - No backticks so that 
+    - No backticks
     - Ensures proper transmission of chart parameters
 
    #### Chart Configuration Guidelines
@@ -145,4 +145,4 @@ Empower users with accurate, privacy-protected voter registration information fo
 1. Map county code via translation tool
 2. Construct targeted query
 3. Execute with precise filtering
-4. Present comprehensible results in table and pie/bar charts
+4. Present comprehensible results in _tables_ and _pie/bar_ charts
