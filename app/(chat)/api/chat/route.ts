@@ -1,19 +1,14 @@
-import { convertToCoreMessages, type Message, streamText, type CoreSystemMessage, createDataStreamResponse } from 'ai';
+import { convertToCoreMessages, type Message, streamText, createDataStreamResponse } from 'ai';
 import { auth } from '@/app/(auth)/auth';
 import { models } from '@/lib/ai/models';
 import { deleteChatById, getChatById, saveChat, saveMessages, } from '@/lib/db/queries';
 import { generateUUID, getMostRecentUserMessage, sanitizeResponseMessages, } from '@/lib/utils';
 import { generateTitleFromUserMessage } from '../../actions';
 import { getVoterAiChatUiToolset } from "@/lib/voter/query/voter-ui-toolset";
-import { openai } from "@ai-sdk/openai";
 
-import voterAiAssistantSystemMessage from '@/lib/voter/prompt-engineering/voter-ai-agent-system-message.md';
 import { fetchStaticMapTool } from "@/lib/tools/fetchStaticMapTool";
+import { getAnthropicModel } from "@/chat-models/anthropic";
 
-const voterAssistantSystemMessage: CoreSystemMessage = {
-	role: "system",
-	content: voterAiAssistantSystemMessage
-}
 export const maxDuration = 60; // This function can run for a maximum of 30 seconds
 
 export async function POST(request: Request) {
@@ -72,12 +67,13 @@ export async function POST(request: Request) {
 		});
 
 		return createDataStreamResponse({
-			execute: (streamingData) => {
+			execute: async (streamingData) => {
+				const { model, systemMessage: system } = await getAnthropicModel()
 				streamingData.writeData('initialized call');
 
 				const result = streamText({
-					model: openai('gpt-4o-2024-08-06'),
-					system: voterAssistantSystemMessage.content,
+					model,
+					system,
 					messages: coreMessages,
 					maxSteps: 20,
 //					onStepFinish: ({response: {messages}}) => {
