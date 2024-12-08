@@ -158,10 +158,10 @@ COMMENT ON COLUMN public.voter_all_data.last_contact_date IS 'Date of the last c
 
 // Example of registering the tool for executing SELECT statements
 export const fetchTableDdlTool = tool({
-	description: "Searches the vector store for table definitions (DDLs) based on user-provided input. This tool utilizes vector embeddings to determine which DDLs are most similar to the user's input, allowing the user to find matching table definitions that align with their search query. It is especially useful for identifying specific database tables based on schema information.",
+	description: "REQUIRED: provides a DDL for the table to query.",
 	parameters: z.object({
-		userInput: z.string().describe('The complete user-provided input for searching the vector store. This input is expected to be descriptive and related to the table information being sought, such as keywords, phrases, or any identifying attributes about the database structure that the user is interested in finding.'),
-		topK: z.number().optional().default(2).describe('The maximum number of top results to return from the similarity search. This defines how many table DDLs will be presented based on their similarity score relative to the user input. It should be a positive integer, with higher values returning more possible matches. Default value is set to 2, which provides a balanced set of results without overwhelming the user.')
+	userInput: z.string().describe('The complete user-provided input.'),
+		// topK: z.number().optional().default(2).describe('The maximum number of top results to return from the similarity search. This defines how many table DDLs will be presented based on their similarity score relative to the user input. It should be a positive integer, with higher values returning more possible matches. Default value is set to 2, which provides a balanced set of results without overwhelming the user.')
 	}),
 	execute: fetchTableDdls,
 });

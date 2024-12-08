@@ -78,9 +78,9 @@ export const executeSelects = async ({ selects = [] }: { selects: string[] }):
 
 // Register the tool for executing SELECT statements on a PostgreSQL database
 export const executeSelectsTool = tool({
-	description: "Executes multiple SELECT SQL queries against a PostgreSQL database and returns the results as an array of JSON objects. This tool is particularly useful for querying multiple data sources or tables in a single request, enabling efficient retrieval of structured data based on user-defined queries.",
+	description: "Executes multiple SELECT SQL queries against a PostgreSQL database and returns the results as an array of JSON objects.",
 	parameters: z.object({
-		selects: z.string().array().describe("An array of valid PostgreSQL SELECT statements to be executed sequentially. Each statement must be syntactically correct and query the appropriate database tables. Ensure the statements do not modify the database state and are strictly SELECT operations to avoid unintended side effects."),
+		selects: z.string().array().describe("An array of valid PostgreSQL SELECT statements to be executed sequentially."),
 	}),
 	execute: executeSelects,
 });
