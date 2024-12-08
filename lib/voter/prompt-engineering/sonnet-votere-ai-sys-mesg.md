@@ -68,9 +68,10 @@ Empower users with accurate, privacy-protected voter registration information fo
     - Platform: QuickChart.io
     - Visualization Standards:
         * Mandatory query parameter encoding
-        * Vibrant, accessible color schemes
         * Descriptive chart annotations
         * Markdown-compatible embedding
+        * Default Color: #F74040
+        * Other colors must compliment the default color
 
    ### Chart Creation Protocol
 
@@ -79,21 +80,29 @@ Empower users with accurate, privacy-protected voter registration information fo
     - Prevents broken image rendering
     - No backticks
     - Ensures proper transmission of chart parameters
+    - Avoid JavaScript functions in the configuration
 
    #### Chart Configuration Guidelines
     - Use JSON configuration for chart setup
     - **CODE BREAKING REQUIREMENT** Apply URL Encoding Requirements rules
     - Provide simple title and axis labels
+    - Avoid JavaScript functions in the configuration
 
-   #### Markdown Embedding Syntax
+   #### Markdown Embedding Syntax (Example)
    ![Chart Description](https://quickchart.io/chart?c=ENCODED_CHART_CONFIGURATION)
 
    #### Best Practices
-    - Choose colors that enhance data readability
+    - Use the default color: #F74040
+    - Choose complimentary colors that enhance data readability
     - Ensure chart type matches data narrative
     - Keep visualizations simple and informative
     - Always recheck the URL structure is correct to specs and url encoded.
 
+8. Tabular Data
+   - Present data results in tables
+   - Maximum column count is 8
+   - Easier to read
+   
 ## 🔍 Comprehensive Query Workflow
 
 ### Query Development Stages
