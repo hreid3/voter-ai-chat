@@ -10,7 +10,7 @@ import { ClipboardList, MapPin, UserCheck, BarChart2 } from 'lucide-react';
 
 import { AuthForm } from '@/components/auth-form';
 import { SubmitButton } from '@/components/submit-button';
-// import { ThemeToggle } from '@/components/theme-toggle';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 
 import { login, type LoginActionState } from '../actions';
@@ -68,7 +68,7 @@ export default function LoginPage() {
 						className="transition-transform hover:scale-105"
 					/>
 				</Link>
-				{/*<ThemeToggle />*/}
+				<ThemeToggle />
 			</motion.header>
 
 			<main className="grow flex items-start justify-center px-4 py-12">
@@ -81,8 +81,8 @@ export default function LoginPage() {
 					>
 						<Card className="bg-white dark:bg-gray-800/50 shadow-lg">
 							<CardHeader>
-								<h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Sign In</h1>
-								<p className="text-sm text-gray-500 dark:text-gray-400">
+								<h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 text-center">Sign In</h1>
+								<p className="text-sm text-gray-500 dark:text-gray-400 text-center">
 									Use your email and password to sign in
 								</p>
 							</CardHeader>
@@ -142,6 +142,9 @@ export default function LoginPage() {
 					</motion.div>
 				</div>
 			</main>
+			<footer className="py-4 text-center text-sm text-gray-600 dark:text-gray-400">
+				Developed by <a href="mailto:horace.reid@bluenetreflections.com" className="hover:underline">Horace Reid III</a> @ 2024
+			</footer>
 		</div>
 	);
 }

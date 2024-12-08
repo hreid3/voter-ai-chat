@@ -10,7 +10,7 @@ import { convertToUIMessages, isUUID } from '@/lib/utils';
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const { id } = params;
-	if (!isUUID(id)) {
+	if (id && !isUUID(id)) {
 		return notFound();
 	}
 

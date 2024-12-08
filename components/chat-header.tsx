@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { BetterTooltip } from '@/components/ui/tooltip';
 import { PlusIcon, } from './icons';
 import { useSidebar } from './ui/sidebar';
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function ChatHeader({ selectedModelId }: { selectedModelId: string }) {
   const router = useRouter();
@@ -34,6 +35,7 @@ export function ChatHeader({ selectedModelId }: { selectedModelId: string }) {
 					</span>
         </BetterTooltip>
       )}
+			<div className="ml-auto"><ThemeToggle /></div>
     </header>
   );
 }

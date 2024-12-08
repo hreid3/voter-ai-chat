@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { BarChart, FileText, MapPin, PieChart, ChevronRight } from 'lucide-react'
-// import { ThemeToggle } from '@/components/theme-toggle'
+import { ThemeToggle } from '@/components/theme-toggle'
 import { motion } from 'framer-motion'
 
 const fadeInUp = {
@@ -30,7 +30,7 @@ export default function HomePage() {
 				transition={{ duration: 0.5 }}
 			>
 				<nav className="space-x-4">
-					{/*<ThemeToggle />*/}
+					<ThemeToggle />
 					<Button asChild variant="ghost" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
 						<motion.div whileHover={hoverScale}>
 							<Link href="/login">Sign In</Link>
@@ -101,7 +101,7 @@ export default function HomePage() {
 				</div>
 			</motion.div>
 
-			<hr className="border-t border-gray-700/30 w-full max-w-4xl mx-auto my-8 hidden dark:block" />
+			<hr className="border-t border-gray-700/30 w-full mx-auto my-8 hidden dark:block" />
 
 			{/* Features Section */}
 			<div className="container mx-auto px-4 py-12 bg-white dark:bg-transparent">
@@ -144,7 +144,7 @@ export default function HomePage() {
 
 			{/* CTA Section */}
 			<div className="py-16 bg-gray-50 dark:bg-transparent">
-				<hr className="border-t border-gray-700/30 w-full max-w-4xl mx-auto mb-16 hidden dark:block" />
+				<hr className="border-t border-gray-700/30 w-full mx-auto mb-16 hidden dark:block" />
 				<motion.div
 					className="container mx-auto px-4 text-center"
 					initial={{ opacity: 0, y: 20 }}
@@ -163,6 +163,9 @@ export default function HomePage() {
 					</Button>
 				</motion.div>
 			</div>
+			<footer className="py-4 text-center text-sm text-gray-600 dark:text-gray-400">
+				Developed by <a href="mailto:horace.reid@bluenetreflections.com" className="hover:underline">Horace Reid III</a> @ 2024
+			</footer>
 		</div>
 	)
 }
