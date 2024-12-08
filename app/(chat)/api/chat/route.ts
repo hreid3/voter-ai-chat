@@ -67,8 +67,8 @@ export async function POST(request: Request) {
 		});
 
 		return createDataStreamResponse({
-			execute: async (streamingData) => {
-				const { model, systemMessage: system } = await getAnthropicModel()
+			execute: (streamingData) => {
+				const { model, systemMessage: system } = getAnthropicModel()
 				streamingData.writeData('initialized call');
 
 				const result = streamText({

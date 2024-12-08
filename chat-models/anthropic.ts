@@ -1,4 +1,3 @@
-'use server';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import sonnetVoterAiSysMesg from '@/lib/voter/prompt-engineering/sonnet-votere-ai-sys-mesg.md';
 
@@ -9,7 +8,7 @@ const anthropic = createAnthropic({
 	}
 	// custom settings
 });
-export const  getAnthropicModel = async () => {
+export const  getAnthropicModel = () => {
 	const model = anthropic('claude-3-5-sonnet-latest');
 
 	return { model, systemMessage: sonnetVoterAiSysMesg }
