@@ -112,7 +112,7 @@ export async function POST(request: Request) {
 						streamingData.writeData('call completed');
 					},
 					experimental_telemetry: {
-						isEnabled: true,
+						isTrackingEnabledisTrackingEnabled: true,
 						functionId: 'stream-text',
 					},
 				});

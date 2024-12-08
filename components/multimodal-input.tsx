@@ -27,6 +27,7 @@ import { ArrowUpIcon, StopIcon } from './icons';
 import { PreviewAttachment } from './preview-attachment';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
+import useGoogleAnalytics from "@/hooks/useGoogleAnalytics";
 
 const suggestedActions = [
 	{
@@ -78,6 +79,7 @@ export function MultimodalInput({
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();
+	const { trackEvent } = useGoogleAnalytics();
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -125,10 +127,11 @@ export function MultimodalInput({
 
   const submitForm = useCallback(() => {
     window.history.replaceState({}, '', `/chat/${chatId}`);
+
     handleSubmit(undefined, {
       experimental_attachments: attachments,
     });
-
+		trackEvent("chat", "user-chat-message" )
     setAttachments([]);
     setLocalStorageInput('');
 
@@ -215,6 +218,7 @@ export function MultimodalInput({
                 <Button
                   variant="ghost"
                   onClick={async () => {
+										trackEvent("chat", "click-suggestion", suggestedAction.action);
                     window.history.replaceState({}, '', `/chat/${chatId}`);
 
                     append({
