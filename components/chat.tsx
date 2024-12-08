@@ -87,7 +87,7 @@ export function Chat({
 	}, [error])
 	return (
 		<>
-			<div className="flex flex-col min-w-0 h-dvh bg-background">
+			<div className="flex flex-col min-w-0 h-dvh dark:bg-gradient-to-b dark:from-gray-950 dark:to-gray-900">
 				<ChatHeader selectedModelId={selectedModelId}/>
 				<div
 					ref={messagesContainerRef}
@@ -123,7 +123,7 @@ export function Chat({
 						className="shrink-0 min-w-[24px] min-h-[24px]"
 					/>
 				</div>
-				<form className="flex mx-auto px-4 bg-background pb-3 md:pb-2 gap-2 w-full md:max-w-3xl">
+				<form className="flex mx-auto px-4 pb-3 md:pb-2 gap-2 w-full md:max-w-3xl">
 					<MultimodalInput
 						chatId={id}
 						input={input}

@@ -1,67 +1,148 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { motion } from 'framer-motion';
+import { ClipboardList, MapPin, UserCheck, BarChart2 } from 'lucide-react';
 
 import { AuthForm } from '@/components/auth-form';
 import { SubmitButton } from '@/components/submit-button';
+// import { ThemeToggle } from '@/components/theme-toggle';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 
 import { login, type LoginActionState } from '../actions';
 
-export default function Page() {
-  const router = useRouter();
+const fadeInUp = {
+	initial: { opacity: 0, y: 20 },
+	animate: { opacity: 1, y: 0 },
+	transition: { duration: 0.5 }
+};
 
-  const [email, setEmail] = useState('');
-  const [isSuccessful, setIsSuccessful] = useState(false);
+export default function LoginPage() {
+	const router = useRouter();
 
-  const [state, formAction] = useActionState<LoginActionState, FormData>(
-    login,
-    {
-      status: 'idle',
-    },
-  );
+	const [email, setEmail] = useState('');
+	const [isSuccessful, setIsSuccessful] = useState(false);
 
-  useEffect(() => {
-    if (state.status === 'failed') {
-      toast.error('Invalid credentials!');
-    } else if (state.status === 'invalid_data') {
-      toast.error('Failed validating your submission!');
-    } else if (state.status === 'success') {
-      setIsSuccessful(true);
-      router.refresh();
-    }
-  }, [state.status, router]);
+	const [state, formAction] = useActionState<LoginActionState, FormData>(
+		login,
+		{
+			status: 'idle',
+		},
+	);
 
-  const handleSubmit = (formData: FormData) => {
-    setEmail(formData.get('email') as string);
-    formAction(formData);
-  };
+	useEffect(() => {
+		if (state.status === 'failed') {
+			toast.error('Invalid credentials!');
+		} else if (state.status === 'invalid_data') {
+			toast.error('Failed validating your submission!');
+		} else if (state.status === 'success') {
+			setIsSuccessful(true);
+			toast.success('Login successful!');
+			router.refresh();
+		}
+	}, [state.status, router]);
 
-  return (
-    <div className="flex h-dvh w-screen items-start pt-12 md:pt-0 md:items-center justify-center bg-background">
-      <div className="w-full max-w-md overflow-hidden rounded-2xl flex flex-col gap-12">
-        <div className="flex flex-col items-center justify-center gap-2 px-4 text-center sm:px-16">
-          <h3 className="text-xl font-semibold dark:text-zinc-50">Sign In</h3>
-          <p className="text-sm text-gray-500 dark:text-zinc-400">
-            Use your email and password to sign in
-          </p>
-        </div>
-        <AuthForm action={handleSubmit} defaultEmail={email}>
-          <SubmitButton isSuccessful={isSuccessful}>Sign in</SubmitButton>
-          <p className="text-center text-sm text-gray-600 mt-4 dark:text-zinc-400">
-            {"Don't have an account? "}
-            <Link
-              href="/register"
-              className="font-semibold text-gray-800 hover:underline dark:text-zinc-200"
-            >
-              Sign up
-            </Link>
-            {' for free.'}
-          </p>
-        </AuthForm>
-      </div>
-    </div>
-  );
+	const handleSubmit = (formData: FormData) => {
+		setEmail(formData.get('email') as string);
+		formAction(formData);
+	};
+
+	return (
+		<div className="flex min-h-screen flex-col bg-white dark:bg-gradient-to-b dark:from-gray-950 dark:to-gray-900">
+			<motion.header
+				className="container mx-auto px-4 py-6 flex justify-between items-center"
+				initial={{ opacity: 0, y: -20 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ duration: 0.5 }}
+			>
+				<Link href="/">
+					<Image
+						src="/images/original-logo.svg"
+						alt="VoterAI Logo"
+						width={150}
+						height={50}
+						className="transition-transform hover:scale-105"
+					/>
+				</Link>
+				{/*<ThemeToggle />*/}
+			</motion.header>
+
+			<main className="grow flex items-start justify-center px-4 py-12">
+				<div className="w-full max-w-6xl flex flex-col md:flex-row gap-8">
+					<motion.div
+						className="w-full md:w-1/2"
+						initial="initial"
+						animate="animate"
+						variants={fadeInUp}
+					>
+						<Card className="bg-white dark:bg-gray-800/50 shadow-lg">
+							<CardHeader>
+								<h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Sign In</h1>
+								<p className="text-sm text-gray-500 dark:text-gray-400">
+									Use your email and password to sign in
+								</p>
+							</CardHeader>
+							<CardContent>
+								<AuthForm action={handleSubmit} defaultEmail={email}>
+									<SubmitButton isSuccessful={isSuccessful} className="bg-[#F74040] hover:bg-[#F74040]/90 text-white">Sign in</SubmitButton>
+								</AuthForm>
+							</CardContent>
+							<CardFooter className="flex flex-col space-y-4">
+								<p className="text-sm text-gray-600 dark:text-gray-400">
+									{"Don't have an account? "}
+									<Link
+										href="/register"
+										className="font-semibold text-blue-600 hover:underline dark:text-blue-400"
+									>
+										Sign up
+									</Link>
+									{' for free.'}
+								</p>
+								<Link
+									href="/forgot-password"
+									className="text-sm text-blue-600 hover:underline dark:text-blue-400"
+								>
+									Forgot your password?
+								</Link>
+							</CardFooter>
+						</Card>
+					</motion.div>
+
+					<motion.div
+						className="w-full md:w-1/2 hidden md:block"
+						initial="initial"
+						animate="animate"
+						variants={fadeInUp}
+					>
+						<p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 mb-6 mt-8">
+							Your intelligent assistant for accessing accurate, privacy-protected voter registration information in Georgia, USA.
+						</p>
+						<ul className="space-y-6 md:space-y-8">
+							<li className="flex flex-col sm:flex-row sm:items-start">
+								<ClipboardList className="size-8 mb-2 sm:mb-0 sm:mr-4 text-[#F74040]" />
+								<span className="text-base sm:text-lg text-gray-700 dark:text-gray-300">Answer voter registration questions</span>
+							</li>
+							<li className="flex flex-col sm:flex-row sm:items-start">
+								<MapPin className="size-8 mb-2 sm:mb-0 sm:mr-4 text-[#F74040]" />
+								<span className="text-base sm:text-lg text-gray-700 dark:text-gray-300">Provide district and representative information</span>
+							</li>
+							<li className="flex flex-col sm:flex-row sm:items-start">
+								<UserCheck className="size-8 mb-2 sm:mb-0 sm:mr-4 text-[#F74040]" />
+								<span className="text-base sm:text-lg text-gray-700 dark:text-gray-300">Assist with Georgia voter registration process</span>
+							</li>
+							<li className="flex flex-col sm:flex-row sm:items-start">
+								<BarChart2 className="size-8 mb-2 sm:mb-0 sm:mr-4 text-[#F74040]" />
+								<span className="text-base sm:text-lg text-gray-700 dark:text-gray-300">Identify campaign strengths and weaknesses</span>
+							</li>
+						</ul>
+					</motion.div>
+				</div>
+			</main>
+		</div>
+	);
 }
+
