@@ -22,6 +22,7 @@
     "voterdata:create-embeddings": "cross-env NODE_OPTIONS=\"--max-old-space-size=12288\" tsx lib/voter/batch/create-embeddings.ts"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^1.0.4",
     "@ai-sdk/openai": "1.0.5",
     "@langchain/community": "^0.3.16",
     "@langchain/core": "^0.3.19",

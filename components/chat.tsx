@@ -19,14 +19,6 @@ import { MultimodalInput } from './multimodal-input';
 import { Overview } from './overview';
 import { toast } from 'sonner';
 
-export const hideToolUiList = [
-	"fetchTableDdls",
-	"executeSelects",
-	"listVoterDataMappingKeysTool",
-	"voterDataColumnLookupTool",
-	"fetchStaticMapTool",
-];
-
 export function Chat({
 											 id,
 											 initialMessages,
@@ -39,7 +31,7 @@ export function Chat({
 	const {mutate} = useSWRConfig();
 	const [streaming, setStreaming] = useState(false);
 	const {
-		messages: originalMessages,
+		messages,
 		setMessages,
 		handleSubmit,
 		input,
@@ -86,10 +78,6 @@ export function Chat({
 		useScrollToBottom<HTMLDivElement>();
 
 	const [attachments, setAttachments] = useState<Array<Attachment>>([]);
-	const messages = originalMessages
-		.filter(v => !(v.toolInvocations
-			?.find(u => hideToolUiList
-				?.some(t => t === u.toolName))))
 
 	useEffect(() => {
 		if (error) {
@@ -99,7 +87,7 @@ export function Chat({
 	}, [error])
 	return (
 		<>
-			<div className="flex flex-col min-w-0 h-dvh bg-background">
+			<div className="flex flex-col min-w-0 h-dvh dark:bg-gradient-to-b dark:from-gray-950 dark:to-gray-900">
 				<ChatHeader selectedModelId={selectedModelId}/>
 				<div
 					ref={messagesContainerRef}
@@ -135,7 +123,7 @@ export function Chat({
 						className="shrink-0 min-w-[24px] min-h-[24px]"
 					/>
 				</div>
-				<form className="flex mx-auto px-4 bg-background pb-3 md:pb-2 gap-2 w-full md:max-w-3xl">
+				<form className="flex mx-auto px-4 pb-3 md:pb-2 gap-2 w-full md:max-w-3xl">
 					<MultimodalInput
 						chatId={id}
 						input={input}

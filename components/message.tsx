@@ -14,6 +14,16 @@ import { MessageActions } from './message-actions';
 import { PreviewAttachment } from './preview-attachment';
 import ErrorBubble from "@/components/ui/error-bubble";
 
+export const hideToolUiList = [
+	"fetchTableDdls",
+	"executeSelects",
+	"listVoterDataMappingKeysTool",
+	"voterDataColumnLookupTool",
+	"fetchStaticMapTool",
+];
+
+const isToolResult = (message: Message) =>  message?.toolInvocations?.find(v => v.state  === 'result')
+
 export const PreviewMessage = ({
 																 chatId,
 																 message,
@@ -31,9 +41,10 @@ export const PreviewMessage = ({
 	isLoading: boolean;
 	streaming: boolean;
 }) => {
+
 	return (
 		<motion.div
-			className="w-full mx-auto max-w-3xl px-4 group/message"
+			className={`w-full mx-auto max-w-3xl px-4 group/message`}
 			initial={{y: 5, opacity: 0}}
 			animate={{y: 0, opacity: 1}}
 			data-role={message.role}
@@ -67,7 +78,7 @@ export const PreviewMessage = ({
 										<div key={toolCallId}>
 											{toolName === 'errorMessageTool' ? (
 												<ErrorBubble message={args?.errorMessage || "Error Message"}/>
-											) : (
+											) : !hideToolUiList.some(v => v === toolName) && (
 												<pre>{JSON.stringify(result, null, 2)}</pre>
 											)}
 										</div>

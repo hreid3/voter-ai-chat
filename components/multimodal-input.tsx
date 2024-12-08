@@ -83,11 +83,13 @@ export function MultimodalInput({
     if (textareaRef.current) {
       adjustHeight();
     }
-  }, []);
+  }, [input]);
 
   const adjustHeight = () => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
+			textareaRef.current.style.maxHeight = "200px";
+			textareaRef.current.style.overflowY = 'auto';
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight + 2}px`;
     }
   };
@@ -123,7 +125,6 @@ export function MultimodalInput({
 
   const submitForm = useCallback(() => {
     window.history.replaceState({}, '', `/chat/${chatId}`);
-
     handleSubmit(undefined, {
       experimental_attachments: attachments,
     });
@@ -268,7 +269,7 @@ export function MultimodalInput({
         value={input}
         onChange={handleInput}
         className={cx(
-          'border-red min-h-[24px] max-h-[calc(75dvh)] overflow-hidden resize-none rounded-xl text-base bg-muted',
+          'border-red min-h-[24px] max-h-[calc(75dvh)] overflow-hidden resize-none rounded-xl text-base dark:bg-zinc-900 ',
           className,
         )}
         rows={3}

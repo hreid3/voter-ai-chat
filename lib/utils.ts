@@ -228,3 +228,5 @@ export async function readStreamToConsole(readable: any) {
     process.stdout.write(chunk);
   }
 }
+
+export const isUUID = (str: string): boolean => /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(str);
