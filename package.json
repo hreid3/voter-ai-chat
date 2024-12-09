@@ -1,6 +1,6 @@
 {
   "name": "voter-ai-chat",
-  "version": "0.3.3-alpha.2",
+  "version": "0.3.4",
   "author": "Horace Reid III",
   "private": false,
   "scripts": {
