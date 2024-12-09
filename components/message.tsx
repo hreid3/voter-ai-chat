@@ -20,7 +20,6 @@ export const hideToolUiList = [
 	"executeSelects",
 	"listVoterDataMappingKeysTool",
 	"voterDataColumnLookupTool",
-	"fetchStaticMapTool",
 ];
 
 const isToolResult = (message: Message) =>  message?.toolInvocations?.find(v => v.state  === 'result')
@@ -83,6 +82,12 @@ export const PreviewMessage = ({
 												<img
 													src={result?.mapUrl || ""}
 													alt="Static Map"
+													style={{ maxWidth: "100%", height: "auto" }}
+												/>
+											) : toolName === 'fetchStaticChartTool' ? result?.chartUrl && (
+												<img
+													src={result?.chartUrl || ""}
+													alt="Static Chart"
 													style={{ maxWidth: "100%", height: "auto" }}
 												/>
 											) : !hideToolUiList.some(v => v === toolName) && (
