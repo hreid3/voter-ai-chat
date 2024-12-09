@@ -6,12 +6,6 @@ import { ThemeProvider } from '@/components/theme-provider';
 import './globals.css';
 import GoogleAnalyticsProvider from "@/components/analytics/GoogleAnalyticsProvider";
 
-export const metadata: Metadata = {
-  metadataBase: new URL('https://voterai.chat'),
-  title: 'Voter AI Chat',
-  description: 'Voter AI Chat based on the data from secretary of state..',
-};
-
 export const viewport = {
   maximumScale: 1, // Disable auto-zoom on mobile Safari
 };
@@ -35,7 +29,27 @@ const THEME_COLOR_SCRIPT = `\
   observer.observe(html, { attributes: true, attributeFilter: ['class'] });
   updateThemeColor();
 })();`;
-
+export const metadata: Metadata = {
+	title: 'VoterAI',
+	description: 'Empower users with accurate, privacy-protected voter registration information for Georgia through a sophisticated data management system.',
+	metadataBase: new URL('https://voterai.chat'),
+	openGraph: {
+		title: 'VoterAI',
+		description: 'VoteAI is a conversational AI web application to provide voter insights. Explore districts, plan campaigns, and access voter data efficiently.',
+		url: 'https://voterai.chat',
+		siteName: 'VoterAI',
+		images: [
+			{
+				url: '/images/A_visually_engaging_Open_Graph_image_resized_1200x630.png', // Replace with your actual image URL
+				width: 1200,
+				height: 630,
+					alt: 'Diverse group of people standing in line to vote',
+			},
+		],
+		locale: 'en_US',
+		type: 'website',
+	},
+}
 export default async function RootLayout({
   children,
 }: Readonly<{
