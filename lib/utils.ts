@@ -241,3 +241,29 @@ function debounce<F extends (...args: any[]) => void>(
 		timeout = setTimeout(() => func(...args), wait);
 	};
 }
+
+/**
+ * Encodes query parameter values (not keys) in a URL.
+ *
+ * @param url - The URL string to process.
+ * @returns A new URL string with properly encoded query parameters.
+ */
+const encodeQueryParams = (url: string): string => {
+	try {
+		const parsedUrl = new URL(url);
+		const originalParams = parsedUrl.searchParams;
+		const newParams = new URLSearchParams();
+
+		// Only encode the values, not the keys
+		for (const [key, value] of originalParams.entries()) {
+			newParams.append(key, value);
+		}
+
+		// Reconstruct the URL with encoded parameters
+		return `${parsedUrl.origin}${parsedUrl.pathname}?${newParams.toString()}`;
+	} catch (error) {
+		throw new Error(`Invalid URL provided: ${url}`);
+	}
+};
+export default encodeQueryParams;
+
