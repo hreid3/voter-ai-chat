@@ -18,6 +18,7 @@ import { BlockStreamHandler } from './block-stream-handler';
 import { MultimodalInput } from './multimodal-input';
 import { Overview } from './overview';
 import { toast } from 'sonner';
+import TrackingLink from "@/components/ui/TrackingLink";
 
 export function Chat({
 											 id,
@@ -138,7 +139,11 @@ export function Chat({
 						append={append}
 					/>
 				</form>
-				<div  className="pb-1.5 text-center text-sm">Developed by <a className="text-blue-500 underline hover:text-blue-700"   href="mailto:horace.reid@bluenetreflections.com">Horace Reid III</a> @ 2024</div>
+				<div  className="pb-1.5 text-center text-sm">Developed by{' '}
+					<TrackingLink
+						category="chat"
+						action="developer-click"
+							className="text-blue-500 underline hover:text-blue-700"   href="mailto:horace.reid@bluenetreflections.com">Horace Reid III</TrackingLink> @ 2024</div>
 			</div>
 
 			<AnimatePresence>

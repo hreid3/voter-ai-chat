@@ -14,6 +14,8 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 
 import { login, type LoginActionState } from '../actions';
+import useGoogleAnalytics from "@/hooks/useGoogleAnalytics";
+import TrackingLink from "@/components/ui/TrackingLink";
 
 const fadeInUp = {
 	initial: { opacity: 0, y: 20 },
@@ -23,6 +25,7 @@ const fadeInUp = {
 
 export default function LoginPage() {
 	const router = useRouter();
+	const { trackEvent } = useGoogleAnalytics();
 
 	const [email, setEmail] = useState('');
 	const [isSuccessful, setIsSuccessful] = useState(false);
@@ -44,10 +47,12 @@ export default function LoginPage() {
 			toast.success('Login successful!');
 			router.refresh();
 		}
+		trackEvent("signin", "response", state.status, 0 )
 	}, [state.status, router]);
 
 	const handleSubmit = (formData: FormData) => {
 		setEmail(formData.get('email') as string);
+		trackEvent("signin", "cta", "Sign In", 0 )
 		formAction(formData);
 	};
 
@@ -94,20 +99,20 @@ export default function LoginPage() {
 							<CardFooter className="flex flex-col space-y-4">
 								<p className="text-sm text-gray-600 dark:text-gray-400">
 									{"Don't have an account? "}
-									<Link
+									<TrackingLink category="login" action="Click Sign up link"
 										href="/register"
 										className="font-semibold text-blue-600 hover:underline dark:text-blue-400"
 									>
 										Sign up
-									</Link>
+									</TrackingLink>
 									{' for free.'}
 								</p>
-								<Link
-									href="/forgot-password"
-									className="text-sm text-blue-600 hover:underline dark:text-blue-400"
-								>
-									Forgot your password?
-								</Link>
+								{/*<Link*/}
+								{/*	href="/forgot-password"*/}
+								{/*	className="text-sm text-blue-600 hover:underline dark:text-blue-400"*/}
+								{/*>*/}
+								{/*	Forgot your password?*/}
+								{/*</Link>*/}
 							</CardFooter>
 						</Card>
 					</motion.div>
@@ -143,7 +148,9 @@ export default function LoginPage() {
 				</div>
 			</main>
 			<footer className="py-4 text-center text-sm text-gray-600 dark:text-gray-400">
-				Developed by <a href="mailto:horace.reid@bluenetreflections.com" className="hover:underline">Horace Reid III</a> @ 2024
+				Developed by <TrackingLink href="mailto:horace.reid@bluenetreflections.com"
+																	 category="login" action="developer-link"
+																	 className="hover:underline">Horace Reid III</TrackingLink> @ 2024
 			</footer>
 		</div>
 	);
