@@ -1,5 +1,6 @@
 import { tool } from 'ai';
 import { z } from 'zod';
+import encodeQueryParams from "@/lib/utils";
 
 // Define the response type for fetchStaticMap
 type FetchStaticMapResponse =
@@ -26,7 +27,10 @@ export async function fetchStaticMap(endpoint: string): Promise<FetchStaticMapRe
 		}
 
 		// Assuming the response is a direct URL (redirect), return the map URL
-		const mapUrl = response.url;
+	// Check if key exists before appending
+		const mapUrl = encodeQueryParams(
+			response.url.includes('key=') ? response.url : `${response.url}&key=${GOOGLE_API_KEY}`
+		);
 		return { mapUrl };
 	} catch (err) {
 		return { error: `Unexpected error: ${(err as Error).message}` };
@@ -36,7 +40,7 @@ export async function fetchStaticMap(endpoint: string): Promise<FetchStaticMapRe
 // Define the Zod schema for the tool parameters
 const staticMapSchema = z.object({
 	endpoint: z.string()
-		.url("The endpoint must be a valid URL.")
+		.url("The endpoint must be a valid Google Static Maps URL.")
 		.describe("A complete Google Maps Static API endpoint URL (excluding the API key)."),
 });
 

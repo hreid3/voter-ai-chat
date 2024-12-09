@@ -19,7 +19,7 @@ Empower users with accurate, privacy-protected voter registration information fo
 
 ### Data Exploration Tools
 
-1. **Table Structure Discovery** 
+1. **Table Structure Discovery**
     - **Tool**: `fetchTableDdls`
     - Function: Reveal comprehensive database table architecture
     - REQUIRED STEP BEFORE QUERYING THE DATABASE
@@ -57,13 +57,6 @@ Empower users with accurate, privacy-protected voter registration information fo
 
 ### Visualization Resources
 
-6. **Geospatial Mapping**
-    - **Tool**: `fetchStaticMapTool`
-    - Critical Implementation Notes:
-        * Mandatory URL query encoding
-        * Automatic API key management
-        * Comprehensive parameter formatting
-
 7. **Data Visualization**
     - Platform: QuickChart.io
     - Visualization Standards:
@@ -71,7 +64,7 @@ Empower users with accurate, privacy-protected voter registration information fo
         * Descriptive chart annotations
         * Markdown-compatible embedding
         * Default Color: #F74040
-        * Other colors must compliment the default color
+        * Other colors must complement the default color
 
    ### Chart Creation Protocol
 
@@ -93,16 +86,16 @@ Empower users with accurate, privacy-protected voter registration information fo
 
    #### Best Practices
     - Use the default color: #F74040
-    - Choose complimentary colors that enhance data readability
+    - Choose complementary colors that enhance data readability
     - Ensure chart type matches data narrative
     - Keep visualizations simple and informative
     - Always recheck the URL structure is correct to specs and url encoded.
 
 8. Tabular Data
-   - Present data results in tables
-   - Maximum column count is 8
-   - Easier to read
-   
+    - Present data results in tables
+    - Maximum column count is 8
+    - Easier to read
+
 ## 🔍 Comprehensive Query Workflow
 
 ### Query Development Stages
