@@ -1,17 +1,16 @@
 'use client';
 
-import React, { useEffect, type PropsWithChildren } from 'react';
+import React, { type PropsWithChildren, useEffect } from 'react';
 import useGoogleAnalytics from "@/hooks/useGoogleAnalytics";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 const GoogleAnalyticsProvider: React.FC<PropsWithChildren<Record<string, unknown>>> = ({ children }) => {
 	const { trackPageView } = useGoogleAnalytics();
 	const pathname = usePathname()
-	const query = useSearchParams();
 
 	useEffect(() => {
 		try {
-			trackPageView(pathname + query);
+			trackPageView(pathname);
 		} catch (error) {
 			// Recommend: reporting this error to an error tracking service
 			console.log("Error executing trackPageView Google Analytics", { Error: error });
