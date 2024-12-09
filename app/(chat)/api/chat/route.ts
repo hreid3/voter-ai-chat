@@ -1,4 +1,4 @@
-import { convertToCoreMessages, type Message, streamText, createDataStreamResponse } from 'ai';
+import { convertToCoreMessages, createDataStreamResponse, type Message, streamText } from 'ai';
 import { auth } from '@/app/(auth)/auth';
 import { models } from '@/lib/ai/models';
 import { deleteChatById, getChatById, saveChat, saveMessages, } from '@/lib/db/queries';
@@ -46,7 +46,17 @@ export async function POST(request: Request) {
 			return false
 		}).reverse()
 
-		const coreMessages = convertToCoreMessages(messages);
+		const coreMessages = convertToCoreMessages(messages)
+			?.filter(v => {
+				const content = v.content
+				if (Array.isArray(content)) {
+					return !!content?.length
+				} else if (typeof content === 'number') {
+					return true
+				}
+				return !!content
+			})
+
 		const userMessage = getMostRecentUserMessage(coreMessages);
 
 		if (!userMessage) {
