@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Toaster } from 'sonner';
 
 import { ThemeProvider } from '@/components/theme-provider';
+import { Favicon } from "@/components/Favicon";
 
 import './globals.css';
 import GoogleAnalyticsProvider from "@/components/analytics/GoogleAnalyticsProvider";
@@ -51,6 +52,7 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <head>
+				<Favicon />
         <script
           dangerouslySetInnerHTML={{
             __html: THEME_COLOR_SCRIPT,
