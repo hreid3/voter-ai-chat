@@ -26,7 +26,7 @@ export const executeSelects = async ({ selects = [] }: { selects: string[] }):
 		const connectionString = process.env.PG_VOTERDATA_URL;
 
 		// Validate that all queries are SELECT statements using RegEx
-		const isSelectOnly = selects.every((query) => /^SELECT\s+/i.test(query.trim()));
+		const isSelectOnly = selects.every((query) => /^(WITH\s+.*\s+AS\s+\(.*\)\s+SELECT|SELECT)\s+/i.test(query.trim()));
 		if (!isSelectOnly) {
 			throw new Error("Only SELECT statements are allowed.");
 		}
