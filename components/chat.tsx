@@ -8,7 +8,7 @@ import useSWR, { useSWRConfig } from 'swr';
 import { useWindowSize } from 'usehooks-ts';
 
 import { ChatHeader } from '@/components/chat-header';
-import { PreviewMessage, ThinkingMessage } from '@/components/message';
+import { PreviewMessage } from '@/components/message';
 import { useScrollToBottom } from '@/components/use-scroll-to-bottom';
 import type { Vote } from '@/lib/db/schema';
 import { fetcher } from '@/lib/utils';
@@ -18,6 +18,8 @@ import { BlockStreamHandler } from './block-stream-handler';
 import { MultimodalInput } from './multimodal-input';
 import { Overview } from './overview';
 import { toast } from 'sonner';
+import TrackingLink from "@/components/ui/TrackingLink";
+import { ThinkingMessage } from "@/components/ThinkingMessage";
 
 export function Chat({
 											 id,
@@ -95,7 +97,7 @@ export function Chat({
 				>
 					{messages.length === 0 && <Overview/>}
 
-					{messages.map((message, index) => (
+					{messages.filter(v => !!v.content).map((message, index) => (
 						<PreviewMessage
 							key={message.id}
 							chatId={id}
@@ -113,9 +115,10 @@ export function Chat({
 					))}
 
 					{isLoading &&
-						messages.length > 0 &&
-						messages[messages.length - 1].role === 'user' && (
-							<ThinkingMessage/>
+						// messages.length > 0 &&
+						// messages[messages.length - 1].role === 'user' &&
+						(
+							<ThinkingMessage haltAnimation={streaming}/>
 						)}
 
 					<div
@@ -138,7 +141,11 @@ export function Chat({
 						append={append}
 					/>
 				</form>
-				<div  className="pb-1.5 text-center text-sm">Developed by <a className="text-blue-500 underline hover:text-blue-700"   href="mailto:horace.reid@bluenetreflections.com">Horace Reid III</a> @ 2024</div>
+				<div  className="pb-1.5 text-center text-sm">Developed by{' '}
+					<TrackingLink
+						category="chat"
+						action="developer-click"
+							className="text-blue-500 underline hover:text-blue-700"   href="mailto:horace.reid@bluenetreflections.com">Horace Reid III</TrackingLink> @ 2024</div>
 			</div>
 
 			<AnimatePresence>

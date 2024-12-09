@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useActionState, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
-import { ClipboardList, MapPin, UserCheck, BarChart2 } from 'lucide-react';
+import { BarChart2, ClipboardList, MapPin, UserCheck } from 'lucide-react';
 
 import { AuthForm } from '@/components/auth-form';
 import { SubmitButton } from '@/components/submit-button';
@@ -14,15 +14,18 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 
 import { register, type RegisterActionState } from '../actions';
+import useGoogleAnalytics from "@/hooks/useGoogleAnalytics";
+import TrackingLink from "@/components/ui/TrackingLink";
 
 const fadeInUp = {
-	initial: { opacity: 0, y: 20 },
-	animate: { opacity: 1, y: 0 },
-	transition: { duration: 0.5 }
+	initial: {opacity: 0, y: 20},
+	animate: {opacity: 1, y: 0},
+	transition: {duration: 0.5}
 };
 
 export default function RegisterPage() {
 	const router = useRouter();
+	const {trackEvent} = useGoogleAnalytics();
 
 	const [email, setEmail] = useState('');
 	const [isSuccessful, setIsSuccessful] = useState(false);
@@ -46,10 +49,12 @@ export default function RegisterPage() {
 			setIsSuccessful(true);
 			router.refresh();
 		}
+		trackEvent("register", "response", state.status, 0)
 	}, [state, router]);
 
 	const handleSubmit = (formData: FormData) => {
 		setEmail(formData.get('email') as string);
+		trackEvent("register", "cta", "Sign Up", 0)
 		formAction(formData);
 	};
 
@@ -96,12 +101,14 @@ export default function RegisterPage() {
 							<CardFooter className="flex flex-col space-y-4">
 								<p className="text-sm text-gray-600 dark:text-gray-400">
 									{'Already have an account? '}
-									<Link
+									<TrackingLink
+										category="register"
+										action="clicked login link"
 										href="/login"
 										className="font-semibold text-blue-600 hover:underline dark:text-blue-400"
 									>
 										Sign in
-									</Link>
+									</TrackingLink>
 									{' instead.'}
 								</p>
 							</CardFooter>
@@ -131,7 +138,7 @@ export default function RegisterPage() {
 								<span className="text-base sm:text-lg text-gray-700 dark:text-gray-300">Receive guidance on Georgia voter registration process</span>
 							</li>
 							<li className="flex flex-col sm:flex-row sm:items-start">
-								<BarChart2 className="size-8 mb-2 sm:mb-0 sm:mr-4 text-[#F74040]" />
+								<BarChart2 className="size-8 mb-2 sm:mb-0 sm:mr-4 text-[#F74040]"/>
 								<span className="text-base sm:text-lg text-gray-700 dark:text-gray-300">Analyze campaign strengths and weaknesses</span>
 							</li>
 						</ul>
@@ -139,9 +146,12 @@ export default function RegisterPage() {
 				</div>
 			</main>
 			<footer className="py-4 text-center text-sm text-gray-600 dark:text-gray-400">
-				Developed by <a href="mailto:horace.reid@bluenetreflections.com" className="hover:underline">Horace Reid III</a> @ 2024
+				Developed by <TrackingLink
+				category="register" action="developer-click"
+				href="mailto:horace.reid@bluenetreflections.com" className="hover:underline">Horace Reid III</TrackingLink> @
+				2024
 			</footer>
 		</div>
 	);
-}
+	}
 
