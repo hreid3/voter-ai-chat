@@ -4,9 +4,8 @@ import { useSWRConfig } from 'swr';
 import { useCopyToClipboard } from 'usehooks-ts';
 
 import type { Vote } from '@/lib/db/schema';
-import { getMessageIdFromAnnotations } from '@/lib/utils';
 
-import { CopyIcon, ThumbDownIcon, ThumbUpIcon } from './icons';
+import { CopyIcon, } from './icons';
 import { Button } from './ui/button';
 import {
   Tooltip,
@@ -14,7 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from './ui/tooltip';
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 
 export function MessageActions({
   chatId,
