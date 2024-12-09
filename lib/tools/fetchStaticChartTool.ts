@@ -1,19 +1,21 @@
 import { tool } from "ai";
 import { z } from "zod";
-import encodeQueryParams from "@/lib/utils";
 
-// Define the response type for fetchStaticChart
+type QuickChartConfig = Record<string, unknown>;
+
 type FetchStaticChartResponse =
-	| { chartUrl: string } // Success response
-	| { error: string }; // Error response
+	| { chartUrl: string }
+	| { error: string };
 
-// The function to fetch the static map
-export async function fetchStaticChart(
-	quickChartUrl: string
+async function fetchStaticChart(
+	quickChartConfiguration: QuickChartConfig
 ): Promise<FetchStaticChartResponse> {
 	try {
-		// Encode the query parameters and generate the final URL
-		const chartUrl = encodeQueryParams(quickChartUrl);
+		const quickChartIoBase = "https://quickchart.io/chart";
+		const url = new URL(quickChartIoBase);
+		// Configuration is already JSON
+		url.searchParams.set("c", JSON.stringify(quickChartConfiguration));
+		const chartUrl = url.toString();
 		return { chartUrl };
 	} catch (err) {
 		return { error: `Unexpected error: ${(err as Error).message}` };
@@ -22,21 +24,34 @@ export async function fetchStaticChart(
 
 // Define the Zod schema for the tool parameters
 const staticChartSchema = z.object({
-	quickChartUrl: z
+	quickChartConfiguration: z
 		.string()
-		.url("The quickChartUrl must be a valid QuickChart.io URL.")
-		.describe("The quickChartUrl must be a valid QuickCharts.io image URL."),
+		.describe("MUST be a valid JSON string matching QuickChart.io configuration format"),
 });
 
-// Define the tool using AI.SDK
-export const fetchStaticChartTool = tool({
-	description:
-		"Generates a static image from QuickChart.io using a pre-constructed quickChartURL.",
-	parameters: staticChartSchema,
-	execute: async ({ quickChartUrl }: { quickChartUrl: string }) => {
-		const result = await fetchStaticChart(quickChartUrl);
+// Use z.infer to match the schema exactly
+type StaticChartArgs = z.infer<typeof staticChartSchema>;
 
-		// Return result as-is, adhering to the FetchStaticChartResponse type
-		return result;
+export const fetchStaticChartTool = tool({
+	description: "Generates a static image from QuickChart JSON configuration string",
+	parameters: staticChartSchema,
+	execute: async (args: StaticChartArgs) => {
+		const { quickChartConfiguration } = args;
+
+		try {
+			// Parse the JSON string to validate it
+			const config = JSON.parse(quickChartConfiguration);
+
+			// Validate the parsed configuration
+			if (typeof config !== "object" || config === null) {
+				return { error: "Invalid QuickChart configuration: must be a JSON object" };
+			}
+
+			// Pass the parsed object
+			const result = await fetchStaticChart(config as QuickChartConfig);
+			return result;
+		} catch (err) {
+			return { error: `Invalid JSON: ${(err as Error).message}` };
+		}
 	},
 });

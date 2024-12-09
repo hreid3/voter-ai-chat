@@ -60,18 +60,21 @@ Empower users with accurate, privacy-protected voter registration information fo
 7. **Data Visualization**
     - **Tool**: `fetchStaticChartTool`
     - Platform: QuickChart.io
+    - Configuration:
+        * Pass a valid JSON object matching QuickChart.io specifications
+        * All property names and string values must use double quotes
+        * Tool handles all URL encoding and formatting
     - Visualization Standards:
         * Descriptive chart annotations
         * Provide simple title and axis labels
-        * Default Color: #F74040
+        * Default Color: "#F74040"
         * Other colors must complement the default color
-        * CRITICAL: Tool will render static chart.
-    - Chart Creation Protocol
-      * Avoid JavaScript functions in the configuration
-      * Use JSON configuration for chart setup
+        * CRITICAL: Tool will render static chart
+        * Avoid JavaScript functions in the configuration
+        * Configuration must follow strict JSON syntax 
 
 8. Tabular Data
-    - Present data results in tables
+    - MUST present data results in tables
     - Maximum column count is 8
     - Easier to read
 
