@@ -14,6 +14,7 @@ import { MessageActions } from './message-actions';
 import { PreviewAttachment } from './preview-attachment';
 import ErrorBubble from "@/components/ui/error-bubble";
 import RippleEffect from "@/components/RippleEffect";
+import Logo from "@/components/ui/voter-ai-icon";
 
 export const hideToolUiList = [
 	"fetchTableDdls",
@@ -57,7 +58,7 @@ export const PreviewMessage = ({
 			>
 				{message.role === 'assistant' && (
 					<div className="size-8 flex items-center rounded-full justify-center ring-1 shrink-0 ring-border">
-						<RippleEffect isAnimating={streaming || isLoading}><SparklesIcon size={14}/></RippleEffect>
+						<RippleEffect isAnimating={streaming || isLoading}><Logo width={32}/></RippleEffect>
 					</div>
 				)}
 
@@ -115,6 +116,7 @@ export const PreviewMessage = ({
 						message={message}
 						vote={vote}
 						isLoading={isLoading}
+						streaming={streaming}
 					/>
 				</div>
 			</div>
