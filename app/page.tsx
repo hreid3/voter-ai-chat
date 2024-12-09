@@ -1,12 +1,12 @@
 'use client'
 
-import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { BarChart, FileText, MapPin, PieChart, ChevronRight } from 'lucide-react'
+import { BarChart, ChevronRight, FileText, MapPin, PieChart } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { motion } from 'framer-motion'
+import TrackingLink from "@/components/ui/TrackingLink";
 
 const fadeInUp = {
 	initial: { opacity: 0, y: 20 },
@@ -33,12 +33,12 @@ export default function HomePage() {
 					<ThemeToggle />
 					<Button asChild variant="ghost" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
 						<motion.div whileHover={hoverScale}>
-							<Link href="/login">Sign In</Link>
+							<TrackingLink category="home" action="header" href="/login">Sign In</TrackingLink>
 						</motion.div>
 					</Button>
 					<Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
 						<motion.div whileHover={hoverScale}>
-							<Link href="/register">Sign Up</Link>
+							<TrackingLink href="/register" action="header" category="home">Sign Up</TrackingLink>
 						</motion.div>
 					</Button>
 				</nav>
@@ -57,13 +57,15 @@ export default function HomePage() {
 						animate={{ scale: 1, opacity: 1 }}
 						transition={{ duration: 0.5, delay: 0.4 }}
 					>
-						<Image
-							src="/images/original-logo.svg"
-							alt="VoterAI Logo"
-							width={500}
-							height={167}
-							className="mx-auto mb-12 transition-transform hover:scale-105"
-						/>
+						<TrackingLink category="home" action="click logo" href='/'>
+							<Image
+								src="/images/original-logo.svg"
+								alt="VoterAI Logo"
+								width={500}
+								height={167}
+								className="mx-auto mb-12 transition-transform hover:scale-105"
+							/>
+						</TrackingLink>		
 					</motion.div>
 					<motion.h2
 						className="text-xl sm:text-2xl md:text-3xl text-gray-600 dark:text-gray-200"
@@ -86,15 +88,15 @@ export default function HomePage() {
 					>
 						<Button asChild size="lg" className="bg-[#F74040] hover:bg-[#F74040]/90 text-white">
 							<motion.div whileHover={hoverScale}>
-								<Link href="/register">Get Started</Link>
+								<TrackingLink action="Get Started" category="h	ome" href="/register">Get Started</TrackingLink>
 							</motion.div>
 						</Button>
 						<Button asChild size="lg" variant="outline" className="text-gray-800 hover:text-gray-900 dark:text-white dark:hover:text-white">
 							<motion.div whileHover={hoverScale} className="flex items-center">
-								<Link href="/login" className="flex items-center">
+								<TrackingLink href="/login" action="Click sign" category="home" className="flex items-center">
 									Sign In
-									<ChevronRight className="ml-2 size-4" />
-								</Link>
+									<ChevronRight className="ml-2 size-4"/>
+								</TrackingLink>
 							</motion.div>
 						</Button>
 					</motion.div>
@@ -158,13 +160,16 @@ export default function HomePage() {
 					</p>
 					<Button asChild size="lg" className="bg-[#F74040] hover:bg-[#F74040]/90 text-white">
 						<motion.div whileHover={hoverScale}>
-							<Link href="/register">Create Free Account</Link>
+							<TrackingLink href="/register" category="home" action="Create Free Account">Create Free
+								Account</TrackingLink>
 						</motion.div>
 					</Button>
 				</motion.div>
 			</div>
 			<footer className="py-4 text-center text-sm text-gray-600 dark:text-gray-400">
-				Developed by <a href="mailto:horace.reid@bluenetreflections.com" className="hover:underline">Horace Reid III</a> @ 2024
+				Developed by <TrackingLink href="mailto:horace.reid@bluenetreflections.com" category="home"
+																	 action="developer interest" className="hover:underline">Horace Reid
+				III</TrackingLink> @ 2024
 			</footer>
 		</div>
 	)

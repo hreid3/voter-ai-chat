@@ -1,7 +1,6 @@
 'use client';
 
 import { isToday, isYesterday, subMonths, subWeeks } from 'date-fns';
-import Link from 'next/link';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import type { User } from 'next-auth';
 import { useEffect, useState } from 'react';
@@ -36,6 +35,8 @@ import {
 } from '@/components/ui/sidebar';
 import type { Chat } from '@/lib/db/schema';
 import { fetcher } from '@/lib/utils';
+import useGoogleAnalytics from "@/hooks/useGoogleAnalytics";
+import TrackingLink from "@/components/ui/TrackingLink";
 
 type GroupedChats = {
   today: Chat[];
@@ -58,9 +59,9 @@ const ChatItem = ({
 }) => (
   <SidebarMenuItem>
     <SidebarMenuButton asChild isActive={isActive}>
-      <Link href={`/chat/${chat.id}`} onClick={() => setOpenMobile(false)}>
+      <TrackingLink category="chat"  action={`sidebar-open-${chat.id}`} href={`/chat/${chat.id}`} onClick={() => setOpenMobile(false)}>
         <span>{chat.title}</span>
-      </Link>
+      </TrackingLink>
     </SidebarMenuButton>
     <DropdownMenu modal={true}>
       <DropdownMenuTrigger asChild>
@@ -104,7 +105,9 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const router = useRouter();
+	const { trackEvent } = useGoogleAnalytics();
   const handleDelete = async () => {
+		trackEvent("chat", "sidebar-delete", `delete ${deleteId} request`)
     const deletePromise = fetch(`/api/chat?id=${deleteId}`, {
       method: 'DELETE',
     });
@@ -117,6 +120,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
             return history.filter((h) => h.id !== id);
           }
         });
+				trackEvent("chat", "sidebar-delete", `delete ${deleteId} success`)
         return 'Chat deleted successfully';
       },
       error: 'Failed to delete chat',

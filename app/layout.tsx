@@ -4,6 +4,7 @@ import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 
 import './globals.css';
+import GoogleAnalyticsProvider from "@/components/analytics/GoogleAnalyticsProvider";
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://voterai.chat'),
@@ -64,7 +65,7 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <Toaster position="top-center" />
-          {children}
+					<GoogleAnalyticsProvider>{children}</GoogleAnalyticsProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -224,7 +224,7 @@ export function Block({
 							ref={messagesContainerRef}
 							className="flex flex-col gap-4 h-full items-center overflow-y-scroll px-4 pt-20"
 						>
-							{messages.map((message, index) => (
+							{messages.filter(v=> !!v.content).map((message, index) => (
 								<PreviewMessage
 									chatId={chatId}
 									key={message.id}
