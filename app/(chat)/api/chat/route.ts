@@ -8,6 +8,7 @@ import { getVoterAiChatUiToolset } from "@/lib/voter/query/voter-ui-toolset";
 
 import { fetchStaticMapTool } from "@/lib/tools/fetchStaticMapTool";
 import { getAnthropicModel } from "@/chat-models/anthropic";
+import { fetchStaticChartTool } from "@/lib/tools/fetchStaticChartTool";
 
 export const maxDuration = 60; // This function can run for a maximum of 30 seconds
 
@@ -93,6 +94,7 @@ export async function POST(request: Request) {
 					tools: {
 						...getVoterAiChatUiToolset(),
 						fetchStaticMapTool,
+						fetchStaticChartTool,
 					},
 					onFinish: async ({response: {messages: responseMessages}}) => {
 						if (session.user?.id) {

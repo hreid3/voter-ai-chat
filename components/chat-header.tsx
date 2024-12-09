@@ -18,7 +18,7 @@ export function ChatHeader({ selectedModelId }: { selectedModelId: string }) {
 	const { trackEvent } = useGoogleAnalytics();
 
   return (
-    <header className="flex sticky top-0 bg-background py-1.5 items-center px-2 md:px-2 gap-2">
+    <header className="flex sticky top-0 py-1.5 items-center px-2 md:px-2 gap-2">
       <SidebarToggle />
       {(!open || windowWidth < 768) && (
 				<BetterTooltip align="start" content="New Chat">
