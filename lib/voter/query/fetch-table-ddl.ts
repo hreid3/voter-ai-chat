@@ -2,16 +2,16 @@ import { tool } from 'ai';
 import { z } from 'zod';
 
 type DdlResult = {
-	ddl: string,
-	possibleValuesForColumns: string[]
+  ddl: string,
+  possibleValuesForColumns: string[]
 };
 
 type ReturnType = {
-	ddls: DdlResult[]
+  ddls: DdlResult[]
 };
 
 type ErrorMessage = {
-	error: string
+  error: string
 };
 
 /**
@@ -29,27 +29,27 @@ type ErrorMessage = {
  * @return An array of strings where each value represents a DDL of potential matches.
  */
 export const fetchTableDdls = async ({userInput, topK = 2}: {
-	userInput: string,
-	topK?: number
+  userInput: string,
+  topK?: number
 }): Promise<ReturnType | ErrorMessage> => {
-	console.log("Called: fetchTableDdls, received user input", userInput);
+  console.log("Called: fetchTableDdls, received user input", userInput);
 
-	try {
-		// Invariant checks
-		if (!userInput) {
-			throw new Error("Invariant violation: userInput must not be empty.");
-		}
-		if (topK <= 0) {
-			throw new Error("Invariant violation: topK must be greater than 0.");
-		}
+  try {
+    // Invariant checks
+    if (!userInput) {
+      throw new Error("Invariant violation: userInput must not be empty.");
+    }
+    if (topK <= 0) {
+      throw new Error("Invariant violation: topK must be greater than 0.");
+    }
 
-		const ddls = [];
-		ddls.push({
-			possibleValuesForColumns: [],
-			// Now that I am refactoring for final system state, removed the Similarity Search as there is really one single table.
-			// The other tables only denormalized deltas
-			/* The following was gnerated by Chat GPT 3.5 Turbo when inserting rows. */
-			ddl: `
+    const ddls = [];
+    ddls.push({
+      possibleValuesForColumns: [],
+      // Now that I am refactoring for final system state, removed the Similarity Search as there is really one single table.
+      // The other tables only denormalized deltas
+      /* The following was gnerated by Chat GPT 3.5 Turbo when inserting rows. */
+      ddl: `
 CREATE TABLE public.voter_all_data (
     county_code VARCHAR,
     registration_number VARCHAR,
@@ -98,22 +98,22 @@ CREATE TABLE public.voter_all_data (
     last_contact_date TIMESTAMP
 );
     `
-		})
-		return {ddls};
-	} catch (error) {
-		console.error("Error fetching table DDLs:", error);
-		return {
-			error: "Something went wrong, so I could not process your request."
-		};
-	}
+    })
+    return {ddls};
+  } catch (error) {
+    console.error("Error fetching table DDLs:", error);
+    return {
+      error: "Something went wrong, so I could not process your request."
+    };
+  }
 };
 
 // Example of registering the tool for executing SELECT statements
 export const fetchTableDdlTool = tool({
-	description: "REQUIRED: provides a DDL for the table to query.",
-	parameters: z.object({
-	userInput: z.string().describe('The complete user-provided input.'),
-		// topK: z.number().optional().default(2).describe('The maximum number of top results to return from the similarity search. This defines how many table DDLs will be presented based on their similarity score relative to the user input. It should be a positive integer, with higher values returning more possible matches. Default value is set to 2, which provides a balanced set of results without overwhelming the user.')
-	}),
-	execute: fetchTableDdls,
+  description: "REQUIRED: provides a DDL for the table to query.",
+  parameters: z.object({
+    userInput: z.string().describe('The complete user-provided input.'),
+    // topK: z.number().optional().default(2).describe('The maximum number of top results to return from the similarity search. This defines how many table DDLs will be presented based on their similarity score relative to the user input. It should be a positive integer, with higher values returning more possible matches. Default value is set to 2, which provides a balanced set of results without overwhelming the user.')
+  }),
+  execute: fetchTableDdls,
 });

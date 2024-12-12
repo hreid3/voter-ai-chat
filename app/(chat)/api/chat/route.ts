@@ -1,10 +1,4 @@
-import {
-	convertToCoreMessages,
-	type CoreUserMessage,
-	createDataStreamResponse,
-	type Message,
-	streamText,
-} from 'ai';
+import { convertToCoreMessages, type CoreUserMessage, createDataStreamResponse, type Message, streamText, } from 'ai';
 import { auth } from '@/app/(auth)/auth';
 import { models } from '@/lib/ai/models';
 import { deleteChatById, getChatById, saveChat, saveMessages, } from '@/lib/db/queries';
