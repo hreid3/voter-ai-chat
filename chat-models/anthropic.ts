@@ -9,7 +9,9 @@ const anthropic = createAnthropic({
 	// custom settings
 });
 export const  getAnthropicModel = () => {
-	const model = anthropic('claude-3-5-sonnet-latest');
+	const model = anthropic('claude-3-5-sonnet-latest',
+		{ cacheControl: true}
+		);
 
 	return { model, systemMessage: sonnetVoterAiSysMesg }
 

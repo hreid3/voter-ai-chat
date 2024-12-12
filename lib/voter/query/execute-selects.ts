@@ -67,7 +67,7 @@
 			}
 
 			// Return the results if within the token limit
-			return { results };
+				return { results };
 		} catch (error) {
 			console.error("Error executing select statements:", error);
 			return {
