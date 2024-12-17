@@ -31,10 +31,10 @@ export class LegislativeDataImporter {
         try {
             // 1. Import independent entities first
             console.log('Importing sponsors...');
-//            await this.sponsorsImporter.processDirectory(this.rootDir);
+            await this.sponsorsImporter.processDirectory(this.rootDir);
 
             console.log('Importing bills...');
-//            await this.billsImporter.processDirectory(this.rootDir);
+            await this.billsImporter.processDirectory(this.rootDir);
 
             // 2. Process bill-sponsor relationships (handled in BillsDataImporter)
             console.log('Bill-sponsor relationships are handled during bill import');

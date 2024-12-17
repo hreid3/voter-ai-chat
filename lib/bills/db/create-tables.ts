@@ -9,10 +9,15 @@ export async function createTables(sql: Sql) {
         await sql`
             CREATE TABLE IF NOT EXISTS bills (
                 bill_id INTEGER PRIMARY KEY,
+                bill_number TEXT NOT NULL,
+                bill_type VARCHAR(1) NOT NULL,
                 title TEXT NOT NULL,
                 description TEXT NOT NULL,
                 inferred_categories JSONB,
                 subjects JSONB,
+                committee_name TEXT,
+                last_action TEXT,
+                last_action_date TIMESTAMP,
                 embedding VECTOR(384),
                 pdf_url TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -23,6 +28,9 @@ export async function createTables(sql: Sql) {
         await sql`CREATE INDEX IF NOT EXISTS idx_bills_embedding ON bills USING ivfflat (embedding vector_cosine_ops)`;
         await sql`CREATE INDEX IF NOT EXISTS idx_bills_inferred_categories ON bills USING GIN (inferred_categories)`;
         await sql`CREATE INDEX IF NOT EXISTS idx_bills_subjects ON bills USING GIN (subjects)`;
+        await sql`CREATE INDEX IF NOT EXISTS idx_bills_committee_name ON bills(committee_name)`;
+        await sql`CREATE INDEX IF NOT EXISTS idx_bills_bill_number ON bills(bill_number)`;
+        await sql`CREATE INDEX IF NOT EXISTS idx_bills_last_action_date ON bills(last_action_date)`;
 
         // Create sponsors table
         await sql`

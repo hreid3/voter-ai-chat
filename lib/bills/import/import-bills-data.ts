@@ -48,12 +48,26 @@ export class BillsDataImporter {
                                 const jsonData = JSON.parse(fileContent);
                                 const billData = jsonData.bill;
                                 const categories = await this.classifyBill(billData.title, billData.description);
+                                
+                                // Extract committee name from the committee object/array
+                                const committeeName = Array.isArray(billData.committee) 
+                                    ? undefined  // If it's an empty array, use undefined
+                                    : billData.committee?.name;  // Otherwise try to get the name
+                                
+                                // Get the last action from history if available
+                                const lastAction = billData.history?.[billData.history.length - 1];
+                                
                                 const bill: Bill = {
                                     billId: billData.bill_id,
+                                    billNumber: billData.bill_number || '',
+                                    billType: billData.bill_type || 'B',
                                     title: billData.title,
                                     description: billData.description,
                                     inferred_categories: categories,
-                                    subjects: [],
+                                    subjects: billData.subjects || [],
+                                    committeeName,
+                                    lastAction: lastAction?.action,
+                                    lastActionDate: lastAction?.date ? new Date(lastAction.date) : undefined,
                                     pdfUrl: billData.texts?.length > 0 ? billData.texts[billData.texts.length - 1].url : undefined,
                                     createdAt: new Date()
                                 };
@@ -101,19 +115,54 @@ export class BillsDataImporter {
     }
 
     private async storeBill(bill: Bill) {
-        const inferred_categories = bill.inferred_categories ? JSON.stringify(bill.inferred_categories) : null;
-        const subjects = bill.subjects ? JSON.stringify(bill.subjects) : '[]';
+        // Convert undefined values to null for PostgreSQL
         const pdfUrl = bill.pdfUrl ?? null;
+        const committeeName = bill.committeeName ?? null;
+        const lastAction = bill.lastAction ?? null;
+        const lastActionDate = bill.lastActionDate ?? null;
 
+        // @ts-ignore
         await this.sql`
-            INSERT INTO bills (bill_id, title, description, inferred_categories, subjects, pdf_url, created_at)
-            VALUES (${bill.billId}, ${bill.title}, ${bill.description}, ${inferred_categories}::jsonb, ${subjects}::jsonb, ${pdfUrl}, ${bill.createdAt})
+            INSERT INTO bills (
+                bill_id, 
+                bill_number,
+                bill_type,
+                title, 
+                description, 
+                inferred_categories, 
+                subjects, 
+                committee_name,
+                last_action,
+                last_action_date,
+                pdf_url, 
+                created_at
+            )
+            VALUES (
+                ${bill.billId}, 
+                ${bill.billNumber},
+                ${bill.billType},
+                ${bill.title}, 
+                ${bill.description}, 
+                ${bill.inferred_categories || []}, 
+                ${bill.subjects || []}, 
+                ${committeeName},
+                ${lastAction},
+                ${lastActionDate},
+                ${pdfUrl}, 
+                ${bill.createdAt}
+            )
             ON CONFLICT (bill_id) DO UPDATE
-            SET title = ${bill.title},
+            SET bill_number = ${bill.billNumber},
+                bill_type = ${bill.billType},
+                title = ${bill.title},
                 description = ${bill.description},
-                inferred_categories = ${inferred_categories}::jsonb,
-                subjects = ${subjects}::jsonb,
-                pdf_url = ${pdfUrl}
+                inferred_categories = ${bill.inferred_categories || []},
+                subjects = ${bill.subjects || []},
+                committee_name = ${committeeName},
+                last_action = ${lastAction},
+                last_action_date = ${lastActionDate},
+                pdf_url = ${pdfUrl},
+                updated_at = CURRENT_TIMESTAMP
         `;
     }
 

@@ -7,10 +7,15 @@ export interface CategoryWithScore {
 
 export interface Bill {
     billId: number;
+    billNumber: string;
+    billType: string;
     title: string;
     description: string;
     inferred_categories: CategoryWithScore[];
     subjects: string[];
+    committeeName?: string;
+    lastAction?: string;
+    lastActionDate?: Date;
     embedding?: number[];
     pdfUrl?: string;
     createdAt: Date;

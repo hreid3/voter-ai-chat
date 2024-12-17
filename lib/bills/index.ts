@@ -55,7 +55,7 @@ async function main() {
 
         console.log('Import process completed successfully');
     } catch (error) {
-        console.error('Error during import process:', error);
+        console.error('Error during import process:', typeof error === 'object' ? { ...error, config: undefined } : error);
         process.exit(1);
     } finally {
         await sql.end();

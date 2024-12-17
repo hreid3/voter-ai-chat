@@ -67,8 +67,8 @@ Categories (comma-separated):`;
 
     async processBill(bill: Bill): Promise<void> {
         try {
-            // Generate embedding
-            const text = `${bill.title} ${bill.description}`;
+            // Generate embedding with committee name included
+            const text = `${bill.title}\n${bill.description}${bill.committeeName ? `\nCommittee: ${bill.committeeName}` : ''}`;
             const embedding = await this.generateEmbedding(text);
             const embeddingStr = `[${embedding.join(',')}]`;
 
@@ -89,18 +89,19 @@ Categories (comma-separated):`;
 
     async processUnprocessedBills(): Promise<void> {
         try {
+            // Drop the index once at the start
+            await this.sql.unsafe(`DROP INDEX IF EXISTS idx_bills_embedding;`);
+            console.log('Dropped embedding index for batch processing');
+
             let processed = 0;
             let hasMore = true;
 
             while (hasMore) {
                 // Begin a transaction for each batch
                 await this.sql.begin(async (sql) => {
-                    // Drop the index on the embedding column before processing
-                    await sql.unsafe(`DROP INDEX IF EXISTS idx_bills_embedding;`);
-
                     // Get a batch of unprocessed bills
                     const rows = await sql`
-                        SELECT bill_id, title, description, inferred_categories, created_at
+                        SELECT bill_id, bill_number, bill_type, title, description, committee_name, inferred_categories, created_at
                         FROM bills 
                         WHERE embedding IS NULL 
                         LIMIT ${this.batchSize}
@@ -115,8 +116,11 @@ Categories (comma-separated):`;
                     // Map rows to Bill type
                     const bills: Bill[] = rows.map(row => ({
                         billId: row.bill_id,
+                        billNumber: row.bill_number,
+                        billType: row.bill_type,
                         title: row.title,
                         description: row.description,
+                        committeeName: row.committee_name,
                         inferred_categories: row.inferred_categories || [],
                         subjects: [],
                         createdAt: row.created_at
@@ -126,7 +130,7 @@ Categories (comma-separated):`;
 
                     // Process bills in parallel
                     await Promise.all(bills.map(async (bill) => {
-                        const text = `${bill.title} ${bill.description}`;
+                        const text = `${bill.title}\n${bill.description}${bill.committeeName ? `\nCommittee: ${bill.committeeName}` : ''}`;
                         const embedding = await this.generateEmbedding(text);
                         batchEmbeddings.push({ billId: bill.billId, embedding });
                     }));
@@ -152,13 +156,23 @@ Categories (comma-separated):`;
             }
 
             console.log('Finished processing all unprocessed bills');
+
+            // Recreate the index once at the end
+            console.log('Recreating embedding index...');
+            await this.sql.unsafe(`CREATE INDEX IF NOT EXISTS idx_bills_embedding ON bills USING ivfflat (embedding vector_cosine_ops);`);
+            console.log('Embedding index recreated successfully');
         } catch (error) {
             console.error('Error processing bills:', error);
+            // Try to recreate the index in case of error
+            try {
+                console.log('Attempting to recreate embedding index after error...');
+                await this.sql.unsafe(`CREATE INDEX IF NOT EXISTS idx_bills_embedding ON bills USING ivfflat (embedding vector_cosine_ops);`);
+                console.log('Embedding index recreated successfully');
+            } catch (indexError) {
+                console.error('Failed to recreate embedding index:', indexError);
+            }
             throw error;
         }
-
-        // Recreate the index on the embedding column after all processing is complete
-        await this.sql.unsafe(`CREATE INDEX IF NOT EXISTS idx_bills_embedding ON bills USING ivfflat (embedding vector_cosine_ops);`);
     }
 
     async findSimilarBills(billId: string, limit = 5): Promise<Bill[]> {
