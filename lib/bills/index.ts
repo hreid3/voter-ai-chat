@@ -2,34 +2,55 @@ import postgres from 'postgres';
 import { createTables } from './db/create-tables';
 import { LegislativeDataImporter } from './import/data-importer';
 import type { ImporterConfig } from './import/types';
-import * as path from 'node:path';
+import { config } from 'dotenv';
+import path from 'node:path';
+import { promises as fs } from 'node:fs';
+
+// Load environment variables from .env files
+config({
+    path: ['.env.local', path.join(__dirname, '../../../.env.local')],
+});
 
 async function main() {
-    // Load environment variables
-    const sql = postgres({
-        user: process.env.POSTGRES_USER || 'voterdata_test',
-        host: process.env.POSTGRES_HOST || 'voteraichat-db-4-do-user-10585640-0.d.db.ondigitalocean.com',
-        database: process.env.POSTGRES_DB || 'voterdata_test',
-        password: process.env.POSTGRES_PASSWORD,
-        port: Number.parseInt(process.env.POSTGRES_PORT || '25060'),
-    });
+    // Check required environment variables
+    if (!process.env.PG_BILLS_URL) {
+        console.error('Error: PG_BILLS_URL environment variable is required');
+        process.exit(1);
+    }
 
-    const config: ImporterConfig = {
-        sql,
-        rootDir: path.join(__dirname, '../../../public/uploads/bills')
-    };
+    // Check data directory
+    const rootDir = path.join(__dirname, '../../public/uploads/bills');
+    console.log(`Processing bills from root directory: ${rootDir}`);
+
+    let sessions: string[];
+    try {
+        sessions = await fs.readdir(rootDir);
+        console.log('Found session directories:', sessions);
+        if (sessions.length === 0) {
+            console.error('No session directories found');
+            process.exit(1);
+        }
+    } catch (error) {
+        console.error('Error reading bills directory:', error);
+        process.exit(1);
+    }
+
+    // Initialize database connection
+    const sql = postgres(process.env.PG_BILLS_URL);
 
     try {
         // Create database tables
         console.log('Creating database tables...');
         await createTables(sql);
 
-        // Initialize importer
+        // Initialize and run importer
         console.log('Initializing data importer...');
-        const importer = new LegislativeDataImporter(config);
-        await importer.initialize();
+        const importer = new LegislativeDataImporter({
+            sql,
+            rootDir
+        });
 
-        // Start import process
+        await importer.initialize();
         console.log('Starting data import...');
         await importer.importAll();
 

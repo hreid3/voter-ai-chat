@@ -13,7 +13,7 @@ const FeatureExtractionPipeline = () =>
 
         async getInstance(): Promise<any> {
             if (this.pipeline === null) {
-                this.pipeline = await pipeline('feature-extraction', this.model);
+                this.pipeline = await pipeline('feature-extraction', this.model, { dtype: 'fp32' });
             }
             return this.pipeline;
         }

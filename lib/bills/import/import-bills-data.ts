@@ -52,11 +52,37 @@ export class BillsDataImporter {
                                     billId: billData.bill_id,
                                     title: billData.title,
                                     description: billData.description,
-                                    categories: categories,
+                                    inferred_categories: categories,
+                                    subjects: [],
                                     pdfUrl: billData.texts?.length > 0 ? billData.texts[billData.texts.length - 1].url : undefined,
                                     createdAt: new Date()
                                 };
                                 await this.storeBill(bill);
+
+                                // Store bill-sponsor relationships if any
+                                if (billData.sponsors) {
+                                    for (const sponsor of billData.sponsors) {
+                                        try {
+                                            await this.sql`
+                                                INSERT INTO bill_sponsors (bill_id, sponsor_id)
+                                                VALUES (${bill.billId}, ${sponsor.people_id})
+                                                ON CONFLICT (bill_id, sponsor_id) DO NOTHING
+                                            `;
+                                        } catch (err) {
+                                            // Type guard for postgres error
+                                            if (err && typeof err === 'object' && 'code' in err) {
+                                                const error = err as { code: string };
+                                                console.error(`Error linking sponsor ${sponsor.people_id} to bill ${bill.billId}:`, error);
+                                                if (error.code === '23503') { // Foreign key violation
+                                                    console.warn(`Sponsor ${sponsor.people_id} not found in sponsors table`);
+                                                }
+                                            } else {
+                                                console.error(`Unknown error linking sponsor ${sponsor.people_id} to bill ${bill.billId}:`, err);
+                                            }
+                                        }
+                                    }
+                                }
+
                                 await this.updateProcessStatus(filePath, state, session, 'completed');
                             } catch (error) {
                                 console.error(`Error processing bill file ${filePath}:`, error);
@@ -75,16 +101,18 @@ export class BillsDataImporter {
     }
 
     private async storeBill(bill: Bill) {
-        const categories = bill.categories ? JSON.stringify(bill.categories) : null;
+        const inferred_categories = bill.inferred_categories ? JSON.stringify(bill.inferred_categories) : null;
+        const subjects = bill.subjects ? JSON.stringify(bill.subjects) : '[]';
         const pdfUrl = bill.pdfUrl ?? null;
 
         await this.sql`
-            INSERT INTO bills (bill_id, title, description, categories, pdf_url, created_at)
-            VALUES (${bill.billId}, ${bill.title}, ${bill.description}, ${categories}::jsonb, ${pdfUrl}, ${bill.createdAt})
+            INSERT INTO bills (bill_id, title, description, inferred_categories, subjects, pdf_url, created_at)
+            VALUES (${bill.billId}, ${bill.title}, ${bill.description}, ${inferred_categories}::jsonb, ${subjects}::jsonb, ${pdfUrl}, ${bill.createdAt})
             ON CONFLICT (bill_id) DO UPDATE
             SET title = ${bill.title},
                 description = ${bill.description},
-                categories = ${categories}::jsonb,
+                inferred_categories = ${inferred_categories}::jsonb,
+                subjects = ${subjects}::jsonb,
                 pdf_url = ${pdfUrl}
         `;
     }

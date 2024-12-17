@@ -84,42 +84,57 @@ export class RollCallDataImporter {
                 chamber: rawVoteData.chamber,
                 chamber_id: rawVoteData.chamber_id
             };
-            await this.storeRollCall(vote);
 
-            // Process individual roll call votes
-            if (rawVoteData.votes) {
-                for (const v of rawVoteData.votes) {
-                    const rollCallVote: RollCallVote = {
-                        rollCallId: vote.rollCallId,
-                        sponsorId: v.people_id,
-                        vote: v.vote_text
-                    };
-                    await this.storeRollCallVote(rollCallVote);
+            try {
+                // Store main roll call record
+                await this.storeRollCall(vote);
+
+                // Process individual roll call votes
+                if (rawVoteData.votes) {
+                    for (const v of rawVoteData.votes) {
+                        try {
+                            const rollCallVote: RollCallVote = {
+                                rollCallId: vote.rollCallId,
+                                sponsorId: v.people_id,
+                                vote: v.vote_text
+                            };
+                            await this.storeRollCallVote(rollCallVote);
+                        } catch (err) {
+                            // Type guard for postgres error
+                            if (err && typeof err === 'object' && 'code' in err) {
+                                const error = err as { code: string };
+                                console.error(`Error storing vote for sponsor ${v.people_id} on roll call ${vote.rollCallId}:`, error);
+                                if (error.code === '23503') { // Foreign key violation
+                                    console.warn(`Either sponsor ${v.people_id} or roll call ${vote.rollCallId} not found in respective tables`);
+                                }
+                            } else {
+                                console.error(`Unknown error storing vote for sponsor ${v.people_id}:`, err);
+                            }
+                            // Continue processing other votes
+                        }
+                    }
                 }
-            }
 
-            // Update process tracker to 'completed'
-            await this.updateProcessStatus(filePath, state, session, 'completed');
+                await this.updateProcessStatus(filePath, state, session, 'completed');
+            } catch (err) {
+                // Type guard for postgres error
+                if (err && typeof err === 'object' && 'code' in err) {
+                    const error = err as { code: string };
+                    console.error(`Error processing roll call file ${filePath}:`, error);
+                    if (error.code === '23503') { // Foreign key violation
+                        console.warn(`Bill ${vote.billId} not found in bills table`);
+                    }
+                } else {
+                    console.error(`Unknown error processing roll call file ${filePath}:`, err);
+                }
+                await this.updateProcessStatus(filePath, state, session, 'failed');
+                throw err;
+            }
         } catch (error) {
             console.error(`Error processing vote file ${filePath}:`, error);
             await this.updateProcessStatus(filePath, state, session, 'failed');
             throw error;
         }
-    }
-
-    private async storeVote(vote: RollCall) {
-        await this.sql`
-            INSERT INTO votes (roll_call_id, bill_id, date, yea, nay, nv, absent, passed)
-            VALUES (${vote.rollCallId}, ${vote.billId}, ${vote.date}, ${vote.yea}, ${vote.nay}, ${vote.nv}, ${vote.absent}, ${vote.passed})
-            ON CONFLICT (roll_call_id) DO UPDATE
-            SET bill_id = ${vote.billId},
-                date = ${vote.date},
-                yea = ${vote.yea},
-                nay = ${vote.nay},
-                nv = ${vote.nv},
-                absent = ${vote.absent},
-                passed = ${vote.passed}
-        `;
     }
 
     private async storeRollCallVote(rollCallVote: RollCallVote) {

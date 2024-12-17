@@ -11,8 +11,9 @@ export async function createTables(sql: Sql) {
                 bill_id INTEGER PRIMARY KEY,
                 title TEXT NOT NULL,
                 description TEXT NOT NULL,
-                categories JSONB,
-                embedding VECTOR(768),
+                inferred_categories JSONB,
+                subjects JSONB,
+                embedding VECTOR(384),
                 pdf_url TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -20,7 +21,8 @@ export async function createTables(sql: Sql) {
         `;
 
         await sql`CREATE INDEX IF NOT EXISTS idx_bills_embedding ON bills USING ivfflat (embedding vector_cosine_ops)`;
-        await sql`CREATE INDEX IF NOT EXISTS idx_bills_categories ON bills USING GIN (categories)`;
+        await sql`CREATE INDEX IF NOT EXISTS idx_bills_inferred_categories ON bills USING GIN (inferred_categories)`;
+        await sql`CREATE INDEX IF NOT EXISTS idx_bills_subjects ON bills USING GIN (subjects)`;
 
         // Create sponsors table
         await sql`
@@ -37,6 +39,21 @@ export async function createTables(sql: Sql) {
 
         await sql`CREATE INDEX IF NOT EXISTS idx_sponsors_party ON sponsors(party)`;
         await sql`CREATE INDEX IF NOT EXISTS idx_sponsors_district ON sponsors(district)`;
+
+        // Create bill_sponsors mapping table
+        await sql`
+            CREATE TABLE IF NOT EXISTS bill_sponsors (
+                bill_id INTEGER NOT NULL,
+                sponsor_id INTEGER NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (bill_id, sponsor_id),
+                CONSTRAINT fk_bill_sponsors_bill FOREIGN KEY (bill_id) REFERENCES bills(bill_id) ON DELETE CASCADE,
+                CONSTRAINT fk_bill_sponsors_sponsor FOREIGN KEY (sponsor_id) REFERENCES sponsors(sponsor_id) ON DELETE CASCADE
+            )
+        `;
+
+        await sql`CREATE INDEX IF NOT EXISTS idx_bill_sponsors_sponsor_id ON bill_sponsors(sponsor_id)`;
 
         // Create roll_calls table
         await sql`

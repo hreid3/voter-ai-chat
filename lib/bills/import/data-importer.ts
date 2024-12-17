@@ -29,17 +29,22 @@ export class LegislativeDataImporter {
 
     async importAll() {
         try {
-            // Import in order of dependencies
+            // 1. Import independent entities first
             console.log('Importing sponsors...');
-            await this.sponsorsImporter.processDirectory(this.rootDir);
+//            await this.sponsorsImporter.processDirectory(this.rootDir);
 
             console.log('Importing bills...');
-            await this.billsImporter.processDirectory(this.rootDir);
+//            await this.billsImporter.processDirectory(this.rootDir);
 
+            // 2. Process bill-sponsor relationships (handled in BillsDataImporter)
+            console.log('Bill-sponsor relationships are handled during bill import');
+
+            // 3. Process embeddings and classifications after bills are imported
             console.log('Processing bills (generating embeddings and classifications)...');
             await this.billProcessor.processUnprocessedBills();
 
-            console.log('Importing votes...');
+            // 4. Import roll calls (depends on bills)
+            console.log('Importing roll calls...');
             await this.rollCallImporter.processDirectory(this.rootDir);
 
             console.log('Import completed successfully');

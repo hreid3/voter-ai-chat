@@ -79,6 +79,8 @@ Categories (comma-separated):`;
                     updated_at = CURRENT_TIMESTAMP
                 WHERE bill_id = ${bill.billId}
             `;
+
+            console.log(`Embedding created for bill ID: ${bill.billId}`);
         } catch (error) {
             console.error(`Error processing bill ${bill.billId}:`, error);
             throw error;
@@ -91,10 +93,14 @@ Categories (comma-separated):`;
             let hasMore = true;
 
             while (hasMore) {
+                // Begin a transaction for each batch
                 await this.sql.begin(async (sql) => {
+                    // Drop the index on the embedding column before processing
+                    await sql.unsafe(`DROP INDEX IF EXISTS idx_bills_embedding;`);
+
                     // Get a batch of unprocessed bills
                     const rows = await sql`
-                        SELECT bill_id, title, description, categories, created_at
+                        SELECT bill_id, title, description, inferred_categories, created_at
                         FROM bills 
                         WHERE embedding IS NULL 
                         LIMIT ${this.batchSize}
@@ -111,15 +117,37 @@ Categories (comma-separated):`;
                         billId: row.bill_id,
                         title: row.title,
                         description: row.description,
-                        categories: row.categories || [],
+                        inferred_categories: row.inferred_categories || [],
+                        subjects: [],
                         createdAt: row.created_at
                     }));
 
+                    let batchEmbeddings: { billId: number; embedding: number[] }[] = [];
+
                     // Process bills in parallel
-                    await Promise.all(bills.map(bill => this.processBill(bill)));
+                    await Promise.all(bills.map(async (bill) => {
+                        const text = `${bill.title} ${bill.description}`;
+                        const embedding = await this.generateEmbedding(text);
+                        batchEmbeddings.push({ billId: bill.billId, embedding });
+                    }));
+
+                    // Perform a single update for the batch
+                    const updateQueries = batchEmbeddings.map(({ billId, embedding }) => `(${billId}, '[${embedding.join(', ')}]')`).join(', ');
+
+                    // Perform the update operation
+                    const updateQuery = `
+                        UPDATE bills AS b
+                        SET embedding = e.embedding::vector,
+                            updated_at = CURRENT_TIMESTAMP
+                        FROM (VALUES ${updateQueries}) AS e(bill_id, embedding)
+                        WHERE b.bill_id = e.bill_id;
+                    `;
+                    await sql.unsafe(updateQuery);
+
+                    batchEmbeddings = [];
 
                     processed += bills.length;
-                    console.log(`Processed ${processed} bills`);
+                    console.log(`Processed ${processed} bills so far...`);
                 });
             }
 
@@ -128,6 +156,9 @@ Categories (comma-separated):`;
             console.error('Error processing bills:', error);
             throw error;
         }
+
+        // Recreate the index on the embedding column after all processing is complete
+        await this.sql.unsafe(`CREATE INDEX IF NOT EXISTS idx_bills_embedding ON bills USING ivfflat (embedding vector_cosine_ops);`);
     }
 
     async findSimilarBills(billId: string, limit = 5): Promise<Bill[]> {
@@ -143,7 +174,7 @@ Categories (comma-separated):`;
 
             // Find similar bills using cosine similarity
             return await this.sql`
-                SELECT bill_id, title, description, categories
+                SELECT bill_id, title, description, inferred_categories, subjects
                 FROM bills
                 WHERE bill_id != ${billId} AND embedding IS NOT NULL
                 ORDER BY embedding <=> ${bill.embedding}::vector
@@ -158,9 +189,9 @@ Categories (comma-separated):`;
     async findBillsByCategory(category: string, limit = 10): Promise<Bill[]> {
         try {
             return await this.sql`
-                SELECT bill_id, title, description, categories
+                SELECT bill_id, title, description, inferred_categories, subjects
                 FROM bills
-                WHERE categories @> ${[category]}
+                WHERE inferred_categories @> ${[category]}
                 LIMIT ${limit}
             `;
         } catch (error) {

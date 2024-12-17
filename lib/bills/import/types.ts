@@ -9,10 +9,12 @@ export interface Bill {
     billId: number;
     title: string;
     description: string;
-    categories: CategoryWithScore[];
+    inferred_categories: CategoryWithScore[];
+    subjects: string[];
     embedding?: number[];
     pdfUrl?: string;
     createdAt: Date;
+    sponsors?: Sponsor[];
 }
 
 export interface Sponsor {
