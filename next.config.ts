@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
 		ppr: false,
 	},
 	images: {
-		remoteP atterns: [
+		remotePatterns: [
 			{
 				hostname: 'avatar.vercel.sh',
 			},

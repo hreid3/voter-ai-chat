@@ -1,7 +1,6 @@
 import postgres from 'postgres';
 import { createTables } from './db/create-tables';
 import { LegislativeDataImporter } from './import/data-importer';
-import type { ImporterConfig } from './import/types';
 import { config } from 'dotenv';
 import path from 'node:path';
 import { promises as fs } from 'node:fs';
