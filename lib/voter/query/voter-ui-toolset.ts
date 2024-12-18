@@ -2,6 +2,7 @@ import { z } from "zod";
 import { executeSelectsTool } from "@/lib/voter/query/execute-selects";
 import { fetchTableDdlTool } from "@/lib/voter/query/fetch-table-ddl";
 import fetchVoterDataColumnLookupTool, { listVoterDataMappingKeysTool } from "@/lib/voter/query/voter-lookup-values";
+import { billsQueryTool, similarBillsTool } from "@/lib/tools/bills";
 
 export const getVoterAiChatUiToolset = () => {
 	// We can do some trickery here.
@@ -10,6 +11,8 @@ export const getVoterAiChatUiToolset = () => {
 		fetchTableDdls: fetchTableDdlTool,
 		voterDataColumnLookupTool: fetchVoterDataColumnLookupTool,
 		executeSelects: executeSelectsTool,
+		billsQueryTool,
+		similarBillsTool,
 		errorMessageTool: {
 			description: "A utility tool to process and handle error messages returned by any other tool.",
 			parameters: z.object({

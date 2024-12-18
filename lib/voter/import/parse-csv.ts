@@ -3,7 +3,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import CsvReadableStream from 'csv-reader';
 import { config } from 'dotenv';
-import { createVoterDataTables, dropAllTables } from "@/lib/voter/import/create-tables";
+import { createVoterDataTables, } from "@/lib/voter/import/create-tables";
 import type { ParsedRecord, TableInfo } from "@/lib/voter/import/types";
 import { vectorIndexTable } from "@/lib/voter/import/vector-index-table";
 import { insertParsedCsvRecords } from "@/lib/voter/import/insert-voter-row-data";
@@ -112,7 +112,7 @@ async function processCSVFiles(directoryPath: string): Promise<boolean> {
 	try {
 		for (const [index, file] of files.entries()) {
 			if (index === 0) {
-				await dropAllTables();
+				// await dropAllTables();
 			}
 
 			const filePath = path.join(directoryPath, file);

@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
 	experimental: {
 		ppr: false,
 	},
+	serverExternalPackages: ['sharp', 'onnxruntime-node'],
 	images: {
 		remotePatterns: [
 			{
