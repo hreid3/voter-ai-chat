@@ -62,6 +62,12 @@ As a Voter Registration Assistant for data provided by the Georgia, USA, Secreta
         - Handles value transformations automatically (e.g., district IDs, party affiliations, bill numbers)
         - Returns results in a consistent JSON format with query explanation
 
+8. **similarBillsTool**
+
+    - **Purpose**: Finds bills that are semantically similar to a given query using vector similarity search.
+    - **When to Use**: Use this tool to find bills related to a specific topic or concept using natural language queries.
+    - **Note**: The tool's parameters and return values are defined by its schema.
+
 ---
 
 **Guidelines for Usage:**

@@ -5,6 +5,7 @@ import type { z } from 'zod';
 import { billsQuerySchema, responseSchema } from './types';
 import { getTableDDL, loadSystemPrompt } from './utils';
 import { executeSql } from './execute-sql';
+import { similarBillsTool } from './similar-bills';
 
 // Configure OpenAI
 const openai = createOpenAI({
@@ -73,3 +74,4 @@ export type { TableDDLRow } from './types';
 export { billsQuerySchema, responseSchema } from './types';
 export { executeSql } from './execute-sql';
 export { getTableDDL, loadSystemPrompt } from './utils';
+export { similarBillsTool } from './similar-bills';
