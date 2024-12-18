@@ -2,10 +2,9 @@ import { tool } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 import type { z } from 'zod';
-import { billsQuerySchema, responseSchema } from './types';
+import { billsQuerySchema, } from './types';
 import { getTableDDL, loadSystemPrompt } from './utils';
 import { executeSql } from './execute-sql';
-import { similarBillsTool } from './similar-bills';
 
 // Configure OpenAI
 const openai = createOpenAI({

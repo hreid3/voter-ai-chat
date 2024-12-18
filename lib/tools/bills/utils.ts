@@ -1,5 +1,4 @@
-import { sql } from '@/lib/bills/db';
-import type { TableDDLRow } from './types';
+
 import systemPromptMd from '../prompts/bills-assistant.md';
 import { TABLE_DDL } from '@/lib/bills/db/schema';
 
