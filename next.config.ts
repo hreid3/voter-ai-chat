@@ -13,12 +13,19 @@ const nextConfig: NextConfig = {
 			},
 		],
 	},
-	webpack: (config) => {
+	webpack: (config, { dev }) => {
 		// Add support for importing .md files as strings
 		config.module.rules.push({
 			test: /\.md$/,
 			use: 'raw-loader',
 		});
+
+		// Disable cache in production builds
+		if (config.cache && !dev) {
+			config.cache = {
+				type: 'memory',
+			};
+		}
 
 		return config;
 	},
